@@ -1,0 +1,132 @@
+# تنظیمات .htaccess برای سیستم پروکسی
+# این فایل را در ریشه سایت قرار دهید
+
+# تنظیمات PHP برای فایل‌های بزرگ (4K و بیشتر)
+php_value memory_limit 512M
+php_value max_execution_time 0
+php_value max_input_time 0
+php_value upload_max_filesize 10G
+php_value post_max_size 10G
+php_value max_input_vars 10000
+
+# تنظیمات امنیتی
+<Files "proxy.log">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# فعال کردن compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+</IfModule>
+
+# تنظیمات cache برای فایل‌های استاتیک
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+</IfModule>
+
+# تنظیمات headers امنیتی
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# تنظیمات rewrite برای proxy.php
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # جلوگیری از دسترسی مستقیم به فایل‌های حساس
+    RewriteRule ^(config\.php|proxy\.log|\.htaccess)$ - [F,L]
+    
+    # تنظیمات برای proxy.php
+    RewriteCond %{REQUEST_FILENAME} proxy\.php$
+    RewriteCond %{QUERY_STRING} !^url=
+    RewriteRule ^proxy\.php$ - [F,L]
+</IfModule>
+
+# تنظیمات برای فایل‌های بزرگ
+<IfModule mod_php.c>
+    # افزایش timeout برای فایل‌های بزرگ
+    php_value max_execution_time 0
+    php_value max_input_time 0
+    
+    # تنظیمات حافظه
+    php_value memory_limit 512M
+    
+    # تنظیمات output buffering
+    php_value output_buffering 4096
+    
+    # تنظیمات session
+    php_value session.gc_maxlifetime 3600
+    php_value session.cookie_lifetime 3600
+</IfModule>
+
+# تنظیمات error handling
+ErrorDocument 403 "دسترسی ممنوع"
+ErrorDocument 404 "صفحه یافت نشد"
+ErrorDocument 500 "خطای داخلی سرور"
+
+# تنظیمات MIME types برای فایل‌های ویدیو
+<IfModule mod_mime.c>
+    AddType video/mp4 .mp4
+    AddType video/avi .avi
+    AddType video/x-matroska .mkv
+    AddType video/quicktime .mov
+    AddType video/x-ms-wmv .wmv
+    AddType video/x-flv .flv
+    AddType video/webm .webm
+    AddType video/mp2t .ts
+    AddType video/mp2t .mts
+    AddType video/mp2t .m2ts
+</IfModule>
+
+# تنظیمات برای جلوگیری از hotlinking
+<IfModule mod_rewrite.c>
+    RewriteCond %{HTTP_REFERER} !^$
+    RewriteCond %{HTTP_REFERER} !^https?://(www\.)?filmkhabar\.space [NC]
+    RewriteCond %{HTTP_REFERER} !^https?://(www\.)?185\.235\.196\.22 [NC]
+    RewriteRule \.(mp4|avi|mkv|mov|wmv|flv|webm)$ - [F,L]
+</IfModule>
+
+# تنظیمات rate limiting (اختیاری)
+<IfModule mod_ratelimit.c>
+    SetOutputFilter RATE_LIMIT
+    SetEnv rate-limit 400
+</IfModule>
+
+# تنظیمات برای جلوگیری از directory browsing
+Options -Indexes
+
+# تنظیمات برای فایل‌های default
+DirectoryIndex index.php index.html
+
+# تنظیمات charset
+AddDefaultCharset UTF-8
+
+# تنظیمات برای فایل‌های بزرگ (Apache 2.4+)
+<IfModule mod_reqtimeout.c>
+    RequestReadTimeout header=20-40,MinRate=500
+    RequestReadTimeout body=20,MinRate=500
+</IfModule> 

@@ -1,0 +1,46 @@
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+cache/
+temp/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Configuration files with sensitive data (if any)
+.env
+config.local.php
+
+# Composer (if used in future)
+vendor/
+composer.lock
+
+# Node modules (if used in future)
+node_modules/
+package-lock.json
+
+# Build files (if any)
+build/
+dist/ 

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست پروکسی - Proxy Test</title>
+    <style>
+        body {
+            font-family: 'Tahoma', 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-link {
+            display: block;
+            margin: 15px 0;
+            padding: 15px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        .test-link:hover {
+            background: #2980b9;
+        }
+        .info {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-right: 4px solid #3498db;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-right: 4px solid #ffc107;
+        }
+        code {
+            background: #f8f9fa;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .domain-info {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-right: 4px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 تست عملکرد پروکسی</h1>
+        
+        <div class="domain-info">
+            <strong>🌐 اطلاعات سرور:</strong><br>
+            <strong>دامنه:</strong> filmkhabar.space<br>
+            <strong>IP اختصاصی:</strong> 185.235.196.22<br>
+            <strong>پینگ:</strong> ~178ms (متوسط)
+        </div>
+        
+        <div class="info">
+            <strong>📋 راهنما:</strong> این صفحه برای تست عملکرد پروکسی طراحی شده است. 
+            روی لینک‌های زیر کلیک کنید تا ببینید آیا فایل‌ها از طریق پروکسی دانلود می‌شوند یا خیر.
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ توجه:</strong> قبل از تست، مطمئن شوید که:
+            <ul>
+                <li>فایل <code>proxy.php</code> در ریشه سایت ایران آپلود شده است</li>
+                <li>تنظیمات <code>ALLOWED_HOST</code> در <code>config.php</code> درست است</li>
+                <li>هاست ایران از PHP و cURL پشتیبانی می‌کند</li>
+            </ul>
+        </div>
+
+        <h2>🎬 تست دانلود فیلم</h2>
+        <a href="https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4" 
+           class="test-link" target="_blank">
+            دانلود فیلم Seberg (480p) - via Domain
+        </a>
+
+        <a href="https://185.235.196.22/proxy.php?url=https://sv1.cinetory.space/h2/movie/sv1/tt1780967/Seberg.2019.720p.HardSub.SerFil.mp4" 
+           class="test-link" target="_blank">
+            دانلود فیلم Seberg (720p) - via IP
+        </a>
+
+        <h2>📺 تست دانلود سریال</h2>
+        <a href="https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/h2/series/sv4/tt13819960/s03/2-Web-DL.720p/And.Just.Like.That.S03E01.720p.WEB.DL.HardSub.SerFil.mp4" 
+           class="test-link" target="_blank">
+            دانلود سریال And Just Like That - قسمت 1
+        </a>
+
+        <a href="https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/h2/series/sv4/tt13819960/s03/2-Web-DL.720p/And.Just.Like.That.S03E02.720p.WEB.DL.HardSub.SerFil.mp4" 
+           class="test-link" target="_blank">
+            دانلود سریال And Just Like That - قسمت 2
+        </a>
+
+        <h2>🔧 تست خطا</h2>
+        <a href="https://filmkhabar.space/proxy.php?url=https://example.com/test.mp4" 
+           class="test-link" target="_blank" style="background: #e74c3c;">
+            تست خطا - دامنه غیرمجاز
+        </a>
+
+        <a href="https://filmkhabar.space/proxy.php" 
+           class="test-link" target="_blank" style="background: #e74c3c;">
+            تست خطا - بدون پارامتر URL
+        </a>
+
+        <div class="info">
+            <strong>✅ در صورت موفقیت:</strong> فایل شروع به دانلود می‌شود یا در مرورگر پخش می‌شود.<br>
+            <strong>❌ در صورت خطا:</strong> پیام خطای فارسی نمایش داده می‌شود.
+        </div>
+
+        <h2>📊 بررسی لاگ‌ها</h2>
+        <p>برای بررسی لاگ‌های سیستم، فایل <code>proxy.log</code> را در ریشه سایت بررسی کنید:</p>
+        <code>tail -f /path/to/your/site/proxy.log</code>
+
+        <h2>🔗 لینک مستقیم (بدون پروکسی)</h2>
+        <p>برای مقایسه، این لینک‌ها مستقیماً به سرور خارجی اشاره می‌کنند:</p>
+        <a href="https://sv1.cinetory.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4" 
+           class="test-link" target="_blank" style="background: #95a5a6;">
+            لینک مستقیم (احتمالاً مسدود)
+        </a>
+
+        <h2>⚙️ تنظیمات پیشنهادی</h2>
+        <div class="info">
+            <strong>برای استفاده از IP به جای دامنه:</strong><br>
+            در فایل <code>config.php</code> خط زیر را تغییر دهید:<br>
+            <code>const USE_IP_INSTEAD_OF_DOMAIN = true;</code>
+        </div>
+    </div>
+
+    <script>
+        // اضافه کردن اطلاعات اضافی
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 تست پروکسی بارگذاری شد');
+            console.log('📅 تاریخ تست:', new Date().toLocaleString('fa-IR'));
+            console.log('🌐 دامنه سرور:', 'filmkhabar.space');
+            console.log('🔢 IP سرور:', '185.235.196.22');
+        });
+    </script>
+</body>
+</html> 

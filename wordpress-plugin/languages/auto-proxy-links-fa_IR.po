@@ -1,0 +1,208 @@
+# Persian translation for Auto Proxy Links plugin
+# Copyright (C) 2024 FilmKhabar
+# This file is distributed under the MIT license.
+msgid ""
+msgstr ""
+"Project-Id-Version: Auto Proxy Links 1.0.0\n"
+"Report-Msgid-Bugs-To: https://filmkhabar.space\n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: FilmKhabar <support@filmkhabar.space>\n"
+"Language-Team: Persian\n"
+"Language: fa_IR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: auto-proxy-links.php:15
+msgid "Auto Proxy Links"
+msgstr "تبدیل خودکار لینک‌های پروکسی"
+
+#: auto-proxy-links.php:16
+msgid "Automatically converts direct links to sv1.cinetory.space into proxy links through Iranian host for bypassing download restrictions."
+msgstr "به طور خودکار لینک‌های مستقیم به sv1.cinetory.space را به لینک‌های پروکسی از طریق سرور ایران تبدیل می‌کند."
+
+#: auto-proxy-links.php:19
+msgid "FilmKhabar"
+msgstr "فیلم خبر"
+
+#: auto-proxy-links.php:22
+msgid "auto-proxy-links"
+msgstr "تبدیل-خودکار-لینک‌های-پروکسی"
+
+#: admin/admin-page.php:25
+msgid "General Settings"
+msgstr "تنظیمات عمومی"
+
+#: admin/admin-page.php:26
+msgid "Advanced Settings"
+msgstr "تنظیمات پیشرفته"
+
+#: admin/admin-page.php:27
+msgid "Connection Test"
+msgstr "تست اتصال"
+
+#: admin/admin-page.php:32
+msgid "Enable Plugin"
+msgstr "فعال کردن پلاگین"
+
+#: admin/admin-page.php:35
+msgid "Enable or disable automatic link conversion"
+msgstr "فعال یا غیرفعال کردن تبدیل خودکار لینک‌ها"
+
+#: admin/admin-page.php:40
+msgid "Proxy Domain"
+msgstr "دامنه پروکسی"
+
+#: admin/admin-page.php:43
+msgid "Iranian server domain (e.g., filmkhabar.space)"
+msgstr "دامنه سرور ایران (مثال: filmkhabar.space)"
+
+#: admin/admin-page.php:48
+msgid "Dedicated IP"
+msgstr "IP اختصاصی"
+
+#: admin/admin-page.php:51
+msgid "Dedicated IP of Iranian server"
+msgstr "IP اختصاصی سرور ایران"
+
+#: admin/admin-page.php:56
+msgid "Use IP instead of Domain"
+msgstr "استفاده از IP به جای دامنه"
+
+#: admin/admin-page.php:59
+msgid "Use IP instead of domain for proxy links"
+msgstr "استفاده از IP به جای دامنه برای لینک‌های پروکسی"
+
+#: admin/admin-page.php:66
+msgid "Allowed Domains"
+msgstr "دامنه‌های مجاز"
+
+#: admin/admin-page.php:69
+msgid "One domain per line"
+msgstr "هر دامنه در یک خط جداگانه"
+
+#: admin/admin-page.php:74
+msgid "Allowed Extensions"
+msgstr "پسوندهای مجاز"
+
+#: admin/admin-page.php:77
+msgid "One extension per line (without dot)"
+msgstr "هر پسوند در یک خط جداگانه (بدون نقطه)"
+
+#: admin/admin-page.php:82
+msgid "Processable Content"
+msgstr "محتوای قابل پردازش"
+
+#: admin/admin-page.php:86
+msgid "Posts"
+msgstr "پست‌ها"
+
+#: admin/admin-page.php:90
+msgid "Pages"
+msgstr "صفحات"
+
+#: admin/admin-page.php:94
+msgid "Widgets"
+msgstr "ویجت‌ها"
+
+#: admin/admin-page.php:98
+msgid "Comments"
+msgstr "نظرات"
+
+#: admin/admin-page.php:105
+msgid "Debug Mode"
+msgstr "حالت دیباگ"
+
+#: admin/admin-page.php:108
+msgid "Log link conversions (development only)"
+msgstr "ثبت لاگ تبدیل لینک‌ها (فقط برای توسعه)"
+
+#: admin/admin-page.php:115
+msgid "Proxy Connection Test"
+msgstr "تست اتصال پروکسی"
+
+#: admin/admin-page.php:116
+msgid "Click the button below to test the proxy server connection:"
+msgstr "برای تست اتصال به سرور پروکسی، روی دکمه زیر کلیک کنید:"
+
+#: admin/admin-page.php:118
+msgid "Test Connection"
+msgstr "تست اتصال"
+
+#: admin/admin-page.php:122
+msgid "Example of converted links:"
+msgstr "مثال لینک‌های تبدیل شده:"
+
+#: admin/admin-page.php:124
+msgid "Original Link:"
+msgstr "لینک اصلی:"
+
+#: admin/admin-page.php:127
+msgid "Proxy Link:"
+msgstr "لینک پروکسی:"
+
+#: admin/admin-page.php:132
+msgid "Shortcode Usage:"
+msgstr "استفاده از شورت‌کد:"
+
+#: admin/admin-page.php:133
+msgid "For manual links, use the following shortcode:"
+msgstr "برای لینک‌های دستی از شورت‌کد زیر استفاده کنید:"
+
+#: admin/admin-page.php:135
+msgid "Save Settings"
+msgstr "ذخیره تنظیمات"
+
+#: auto-proxy-links.php:200
+msgid "Connection successful! Status: %d"
+msgstr "اتصال موفق! وضعیت: %d"
+
+#: auto-proxy-links.php:202
+msgid "Connection failed! Status: %d"
+msgstr "اتصال ناموفق! وضعیت: %d"
+
+#: auto-proxy-links.php:204
+msgid "Connection failed: %s"
+msgstr "اتصال ناموفق: %s"
+
+#: assets/js/auto-proxy-links.js:50
+msgid "Loading..."
+msgstr "در حال بارگذاری..."
+
+#: assets/js/auto-proxy-links.js:60
+msgid "Success:"
+msgstr "موفق:"
+
+#: assets/js/auto-proxy-links.js:62
+msgid "Error:"
+msgstr "خطا:"
+
+#: assets/js/auto-proxy-links.js:65
+msgid "Error: Request failed"
+msgstr "خطا: درخواست ناموفق بود"
+
+#: assets/js/auto-proxy-links.js:67
+msgid "Test Connection"
+msgstr "تست اتصال"
+
+#: assets/js/auto-proxy-links.js:75
+msgid "Testing..."
+msgstr "در حال تست..."
+
+#: assets/js/auto-proxy-links.js:85
+msgid "Plugin settings not available"
+msgstr "تنظیمات پلاگین در دسترس نیست"
+
+#: assets/js/auto-proxy-links.js:90
+msgid "Connection error"
+msgstr "خطا در برقراری ارتباط"
+
+#: auto-proxy-links.php:250
+msgid "Download"
+msgstr "دانلود"
+
+#: auto-proxy-links.php:255
+msgid "Auto Proxy Links: Converted %s to %s"
+msgstr "تبدیل خودکار لینک‌ها: تبدیل %s به %s" 
