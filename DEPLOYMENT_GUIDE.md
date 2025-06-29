@@ -5,6 +5,8 @@
 - **CPU**: 1 هسته
 - **پهنای باند**: نامحدود
 - **هدف**: فقط پروکسی ویدیو
+- **PHP**: 8.3
+- **وب سرور**: Nginx
 
 ---
 
@@ -12,15 +14,12 @@
 
 ### اتصال به سرور:
 ```bash
-ssh root@45.12.143.141
+ssh root@185.235.196.22
 ```
 
 ### به‌روزرسانی سیستم:
 ```bash
-apt update
-```
-```bash
-apt upgrade -y
+apt update && apt upgrade -y
 ```
 
 ### نصب پکیج‌های ضروری:
@@ -30,11 +29,11 @@ apt install -y curl wget git unzip nginx php8.3-fpm php8.3-curl php8.3-mbstring 
 
 ---
 
-## مرحله 2: پیکربندی Nginx (سبک‌تر از Apache)
+## مرحله 2: پیکربندی Nginx
 
 ### حذف سایت پیش‌فرض:
 ```bash
-rm /etc/nginx/sites-enabled/default
+rm -f /etc/nginx/sites-enabled/default
 ```
 
 ### ایجاد فایل سایت پروکسی:
@@ -68,7 +67,7 @@ server {
     }
 
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
         fastcgi_index proxy.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
@@ -96,7 +95,12 @@ EOF
 
 ### فعال کردن سایت:
 ```bash
-ln -s /etc/nginx/sites-available/proxy /etc/nginx/sites-enabled/
+ln -sf /etc/nginx/sites-available/proxy /etc/nginx/sites-enabled/
+```
+
+### تست پیکربندی Nginx:
+```bash
+nginx -t
 ```
 
 ---
@@ -110,7 +114,7 @@ mkdir -p /var/www/proxy
 
 ### تنظیم PHP برای فایل‌های بزرگ:
 ```bash
-cat > /etc/php/8.1/fpm/conf.d/99-proxy.ini << 'EOF'
+cat > /etc/php/8.3/fpm/conf.d/99-proxy.ini << 'EOF'
 memory_limit = 512M
 max_execution_time = 300
 max_input_time = 300
@@ -124,19 +128,16 @@ EOF
 
 ### تنظیم PHP-FPM برای عملکرد بهتر:
 ```bash
-sed -i 's/pm = dynamic/pm = ondemand/' /etc/php/8.1/fpm/pool.d/www.conf
+sed -i 's/pm = dynamic/pm = ondemand/' /etc/php/8.3/fpm/pool.d/www.conf
+sed -i 's/pm.max_children = 5/pm.max_children = 10/' /etc/php/8.3/fpm/pool.d/www.conf
+sed -i 's/pm.start_servers = 2/pm.start_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
+sed -i 's/pm.min_spare_servers = 1/pm.min_spare_servers = 0/' /etc/php/8.3/fpm/pool.d/www.conf
+sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
 ```
+
+### بررسی وجود socket PHP-FPM:
 ```bash
-sed -i 's/pm.max_children = 5/pm.max_children = 10/' /etc/php/8.1/fpm/pool.d/www.conf
-```
-```bash
-sed -i 's/pm.start_servers = 2/pm.start_servers = 1/' /etc/php/8.1/fpm/pool.d/www.conf
-```
-```bash
-sed -i 's/pm.min_spare_servers = 1/pm.min_spare_servers = 0/' /etc/php/8.1/fpm/pool.d/www.conf
-```
-```bash
-sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 1/' /etc/php/8.1/fpm/pool.d/www.conf
+ls -la /var/run/php/php8.3-fpm.sock
 ```
 
 ---
@@ -150,45 +151,120 @@ cd /var/www/proxy
 
 ### آپلود فایل‌های پروکسی (انتخاب یکی از روش‌ها):
 
-#### روش 1: اگر فایل‌ها در GitHub هستند:
+#### روش 1: آپلود مستقیم از GitHub (اگر فایل‌ها در GitHub هستند):
 ```bash
-wget https://raw.githubusercontent.com/your-repo/main/proxy.php
-```
-```bash
-wget https://raw.githubusercontent.com/your-repo/main/config.php
-```
-```bash
-wget https://raw.githubusercontent.com/your-repo/main/test_proxy.html
+wget -O proxy.php https://raw.githubusercontent.com/your-repo/main/proxy.php
+wget -O config.php https://raw.githubusercontent.com/your-repo/main/config.php
+wget -O test_proxy.html https://raw.githubusercontent.com/your-repo/main/test_proxy.html
 ```
 
 #### روش 2: آپلود دستی از کامپیوتر محلی:
 ```bash
 # در ترمینال محلی خود اجرا کنید:
-scp proxy.php config.php test_proxy.html root@45.12.143.141:/var/www/proxy/
+scp proxy.php config.php test_proxy.html root@185.235.196.22:/var/www/proxy/
+```
+
+#### روش 3: ایجاد فایل‌ها مستقیماً روی سرور:
+```bash
+# ایجاد فایل proxy.php
+cat > /var/www/proxy/proxy.php << 'EOF'
+<?php
+require_once 'config.php';
+
+// تنظیمات اولیه
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', '/var/www/proxy/logs/error.log');
+
+// بررسی درخواست
+if (!isset($_GET['url'])) {
+    http_response_code(400);
+    die('خطا: پارامتر URL مورد نیاز است');
+}
+
+$url = $_GET['url'];
+
+// بررسی مجوز هاست
+$parsed_url = parse_url($url);
+if (!in_array($parsed_url['host'], $allowed_hosts)) {
+    http_response_code(403);
+    die('خطا: این هاست مجاز نیست');
+}
+
+// بررسی نوع فایل
+$extension = strtolower(pathinfo($url, PATHINFO_EXTENSION));
+if (!in_array($extension, $allowed_extensions)) {
+    http_response_code(403);
+    die('خطا: این نوع فایل مجاز نیست');
+}
+
+// تنظیم headers
+$headers = [
+    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    'Accept: */*',
+    'Accept-Language: en-US,en;q=0.9',
+    'Accept-Encoding: gzip, deflate',
+    'Connection: keep-alive',
+    'Upgrade-Insecure-Requests: 1'
+];
+
+// اضافه کردن Range header برای resume
+if (isset($_SERVER['HTTP_RANGE'])) {
+    $headers[] = 'Range: ' . $_SERVER['HTTP_RANGE'];
+}
+
+// ایجاد context
+$context = stream_context_create([
+    'http' => [
+        'method' => 'GET',
+        'header' => implode("\r\n", $headers),
+        'timeout' => 300,
+        'follow_location' => true,
+        'max_redirects' => 5
+    ]
+]);
+
+// دریافت فایل
+$file_content = @file_get_contents($url, false, $context);
+
+if ($file_content === false) {
+    http_response_code(500);
+    die('خطا: نتوانستیم فایل را دریافت کنیم');
+}
+
+// دریافت headers پاسخ
+$response_headers = $http_response_header ?? [];
+
+// ارسال headers
+foreach ($response_headers as $header) {
+    if (strpos($header, 'HTTP/') === 0) {
+        continue; // Skip status line
+    }
+    header($header);
+}
+
+// اضافه کردن headers امنیتی
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+
+// ارسال محتوا
+echo $file_content;
+EOF
 ```
 
 ### تنظیم مجوزها:
 ```bash
 chown -R www-data:www-data /var/www/proxy
-```
-```bash
 chmod -R 755 /var/www/proxy
-```
-```bash
 chmod 644 /var/www/proxy/*.php
-```
-```bash
 chmod 644 /var/www/proxy/*.html
 ```
 
 ### ایجاد دایرکتوری لاگ:
 ```bash
 mkdir -p /var/www/proxy/logs
-```
-```bash
 chown www-data:www-data /var/www/proxy/logs
-```
-```bash
 chmod 755 /var/www/proxy/logs
 ```
 
@@ -213,20 +289,10 @@ echo "0 12 * * * /usr/bin/certbot renew --quiet" | crontab -
 ### تنظیم UFW:
 ```bash
 ufw default deny incoming
-```
-```bash
 ufw default allow outgoing
-```
-```bash
 ufw allow ssh
-```
-```bash
 ufw allow 80/tcp
-```
-```bash
 ufw allow 443/tcp
-```
-```bash
 ufw --force enable
 ```
 
@@ -257,8 +323,6 @@ EOF
 ### راه‌اندازی Fail2ban:
 ```bash
 systemctl enable fail2ban
-```
-```bash
 systemctl start fail2ban
 ```
 
@@ -268,23 +332,19 @@ systemctl start fail2ban
 
 ### راه‌اندازی PHP-FPM:
 ```bash
-systemctl enable php8.1-fpm
-```
-```bash
-systemctl start php8.1-fpm
+systemctl enable php8.3-fpm
+systemctl start php8.3-fpm
 ```
 
 ### راه‌اندازی Nginx:
 ```bash
 systemctl enable nginx
-```
-```bash
 systemctl start nginx
 ```
 
 ### بررسی وضعیت:
 ```bash
-systemctl status nginx php8.1-fpm
+systemctl status nginx php8.3-fpm
 ```
 
 ---
@@ -301,12 +361,16 @@ curl -I http://filmkhabar.space/proxy.php
 curl -I https://filmkhabar.space/proxy.php
 ```
 
+### تست پروکسی:
+```bash
+curl -I "https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/test.mp4"
+```
+
 ### بررسی لاگ‌ها:
 ```bash
 tail -f /var/log/nginx/error.log
-```
-```bash
 tail -f /var/log/nginx/access.log
+tail -f /var/www/proxy/logs/error.log
 ```
 
 ### بررسی استفاده از منابع:
@@ -338,6 +402,10 @@ sysctl -p
 
 ### تنظیمات Nginx برای عملکرد بهتر:
 ```bash
+# Backup فایل اصلی
+cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup
+
+# اضافه کردن تنظیمات به nginx.conf
 cat >> /etc/nginx/nginx.conf << 'EOF'
 # تنظیمات worker
 worker_processes auto;
@@ -382,8 +450,10 @@ echo "CPU: $(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)%"
 echo "RAM: $(free -m | awk 'NR==2{printf "%.1f%%", $3*100/$2 }')"
 echo "Disk: $(df -h | grep '/dev/vda1' | awk '{print $5}')"
 echo "Connections: $(netstat -an | grep :80 | wc -l)"
-echo "Bandwidth (last 5 min):"
-iftop -t -s 5 -L 10
+echo "PHP-FPM Status:"
+systemctl status php8.3-fpm --no-pager -l
+echo "Nginx Status:"
+systemctl status nginx --no-pager -l
 EOF
 ```
 
@@ -392,18 +462,13 @@ EOF
 chmod +x /usr/local/bin/monitor-proxy.sh
 ```
 
-### نصب iftop برای نظارت پهنای باند:
-```bash
-apt install -y iftop
-```
-
 ---
 
 ## دستورات مفید
 
 ### بررسی وضعیت سرویس‌ها:
 ```bash
-systemctl status nginx php8.1-fpm
+systemctl status nginx php8.3-fpm
 ```
 
 ### مشاهده لاگ‌های زنده:
@@ -431,6 +496,16 @@ curl "https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/test.mp4
 /usr/local/bin/monitor-proxy.sh
 ```
 
+### بررسی socket PHP-FPM:
+```bash
+ls -la /var/run/php/php8.3-fpm.sock
+```
+
+### تست پیکربندی Nginx:
+```bash
+nginx -t
+```
+
 ---
 
 ## آدرس‌های مهم
@@ -441,42 +516,41 @@ curl "https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/test.mp4
 
 ---
 
+## عیب‌یابی
+
+### مشکل: PHP-FPM کار نمی‌کند
+```bash
+systemctl status php8.3-fpm
+journalctl -u php8.3-fpm -f
+```
+
+### مشکل: Nginx خطا می‌دهد
+```bash
+nginx -t
+systemctl status nginx
+tail -f /var/log/nginx/error.log
+```
+
+### مشکل: فایل‌ها آپلود نمی‌شوند
+```bash
+ls -la /var/www/proxy/
+chown -R www-data:www-data /var/www/proxy
+```
+
+### مشکل: SSL کار نمی‌کند
+```bash
+certbot certificates
+certbot renew --dry-run
+```
+
+---
+
 ## نکات مهم
 
 ✅ **بهینه شده برای 1GB RAM**: تنظیمات PHP و Nginx بهینه شده  
 ✅ **پشتیبانی از فایل‌های بزرگ**: تا 10GB  
 ✅ **پهنای باند نامحدود**: تنظیمات TCP بهینه شده  
 ✅ **امنیت پایه**: SSL، فایروال، Fail2ban  
-✅ **نظارت ساده**: اسکریپت‌های نظارت  
-
-### در صورت مشکل:
-
-#### بررسی لاگ‌ها:
-```bash
-tail -f /var/log/nginx/error.log
-```
-```bash
-tail -f /var/log/php8.1-fpm.log
-```
-
-#### راه‌اندازی مجدد سرویس‌ها:
-```bash
-systemctl restart nginx php8.1-fpm
-```
-
-#### بررسی پورت‌ها:
-```bash
-netstat -tlnp
-```
-
-#### بررسی وضعیت فایروال:
-```bash
-ufw status
-```
-
-#### بررسی وضعیت Fail2ban:
-```bash
-fail2ban-client status
-```
-
-سرور شما آماده است! پروکسی روی `https://filmkhabar.space/proxy.php` در دسترس خواهد بود. 
+✅ **PHP 8.3**: آخرین نسخه پایدار  
+✅ **نظارت خودکار**: اسکریپت‌های نظارت و لاگ‌گیری  
+✅ **عیب‌یابی آسان**: دستورات مفید برای تشخیص مشکلات  

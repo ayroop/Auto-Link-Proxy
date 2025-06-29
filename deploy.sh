@@ -201,7 +201,7 @@ configure_php() {
     mkdir -p $PROXY_DIR
     
     # PHP settings for large files (based on your php_settings.ini)
-    cat > /etc/php/8.1/fpm/conf.d/99-proxy.ini << 'EOF'
+    cat > /etc/php/8.3/fpm/conf.d/99-proxy.ini << 'EOF'
 ; PHP settings for large files
 memory_limit = 2G
 max_execution_time = 0
@@ -228,11 +228,11 @@ realpath_cache_ttl = 600
 EOF
 
     # Optimize PHP-FPM for low memory
-    sed -i 's/pm = dynamic/pm = ondemand/' /etc/php/8.1/fpm/pool.d/www.conf
-    sed -i 's/pm.max_children = 5/pm.max_children = 10/' /etc/php/8.1/fpm/pool.d/www.conf
-    sed -i 's/pm.start_servers = 2/pm.start_servers = 1/' /etc/php/8.1/fpm/pool.d/www.conf
-    sed -i 's/pm.min_spare_servers = 1/pm.min_spare_servers = 0/' /etc/php/8.1/fpm/pool.d/www.conf
-    sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 1/' /etc/php/8.1/fpm/pool.d/www.conf
+    sed -i 's/pm = dynamic/pm = ondemand/' /etc/php/8.3/fpm/pool.d/www.conf
+    sed -i 's/pm.max_children = 5/pm.max_children = 10/' /etc/php/8.3/fpm/pool.d/www.conf
+    sed -i 's/pm.start_servers = 2/pm.start_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
+    sed -i 's/pm.min_spare_servers = 1/pm.min_spare_servers = 0/' /etc/php/8.3/fpm/pool.d/www.conf
+    sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
     
     print_success "PHP configured successfully"
 }
