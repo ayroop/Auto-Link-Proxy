@@ -9,7 +9,7 @@
 # Default settings
 DOMAIN="tr.modulogic.space"
 EMAIL="your-email@example.com"
-PROXY_IP="185.235.196.22"
+PROXY_IP="45.12.143.141"
 SOURCE_HOST="sv1.neurobuild.space"
 
 # رنگ‌ها برای خروجی

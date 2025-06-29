@@ -6,10 +6,10 @@
 
 // تنظیمات دامنه و پروکسی
 // Domain and proxy settings
-define('SOURCE_DOMAIN', 'sv1.neurobuild.space'); // دامنه منبع اصلی (آلمان)
+define('SOURCE_DOMAIN', 'sv1.netwisehub.space'); // دامنه منبع اصلی (آلمان)
 define('PROXY_DOMAIN', 'tr.modulogic.space'); // دامنه پروکسی ایرانی
 define('PROXY_IP', '45.12.143.141'); // IP اختصاصی سرور ایرانی
-define('EXTERNAL_HOST', 'sv1.neurobuild.space'); // سرور خارجی (آلمان)
+define('EXTERNAL_HOST', 'sv1.netwisehub.space'); // سرور خارجی (آلمان)
 
 // تنظیمات مسیر
 // Path settings
@@ -35,9 +35,15 @@ define('LOG_LEVEL', 'INFO'); // DEBUG, INFO, WARNING, ERROR
 // تنظیمات امنیت
 // Security settings
 define('ALLOWED_HOSTS', [
-    'sv1.neurobuild.space', // سرور آلمان
+    'sv1.netwisehub.space', // سرور آلمان - منبع اصلی
+    'sv1.neurobuild.space', // سرور آلمان - منبع جایگزین
+    'serfil.me',            // سرور جایگزین
+    'SerFil.me',            // سرور جایگزین (حساس به حروف)
     'tr.modulogic.space',   // سرور ایران
-    '45.12.143.141'        // IP سرور ایران
+    '45.12.143.141',        // IP سرور ایران
+    'httpbin.org',          // برای تست
+    'example.com',          // برای تست
+    'google.com'            // برای تست
 ]);
 define('BLOCKED_EXTENSIONS', ['php', 'php3', 'php4', 'php5', 'phtml', 'asp', 'aspx', 'jsp', 'exe', 'bat', 'cmd']);
 
@@ -53,7 +59,13 @@ define('WP_OPTION_NAME', 'auto_proxy_links_settings');
 
 // دامنه‌های مجاز برای پروکسی
 const ALLOWED_HOSTS = [
-    'sv1.neurobuild.space', // سرور آلمان - منبع اصلی
+    'sv1.netwisehub.space', // سرور آلمان - منبع اصلی
+    'sv1.neurobuild.space', // سرور آلمان - منبع جایگزین
+    'serfil.me',            // سرور جایگزین
+    'SerFil.me',            // سرور جایگزین (حساس به حروف)
+    'httpbin.org',          // برای تست
+    'example.com',          // برای تست
+    'google.com',           // برای تست
     // در صورت نیاز دامنه‌های دیگر را اضافه کنید
     // 'example.com',
     // 'another-domain.com',
@@ -273,6 +285,6 @@ function logError(string $message): void {
 ?>
 <script>
 const PROXY_DOMAIN = 'tr.modulogic.space';
-const SOURCE_DOMAIN = 'sv1.neurobuild.space';
+const SOURCE_DOMAIN = 'sv1.netwisehub.space';
 const PROXY_IP = '45.12.143.141';
 </script> 

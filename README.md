@@ -5,7 +5,7 @@
 ## 🌐 دامنه‌های پروژه
 
 - **سرور پروکسی (ایران)**: `tr.modulogic.space`
-- **سرور منبع (آلمان)**: `sv1.neurobuild.space`
+- **سرور منبع (آلمان)**: `sv1.netwisehub.space`
 - **IP سرور ایران**: `45.12.143.141`
 
 ## ✨ ویژگی‌ها
@@ -37,7 +37,7 @@ wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/test_proxy.ht
 ```php
 // تنظیمات دامنه
 define('PROXY_DOMAIN', 'tr.modulogic.space'); // دامنه پروکسی ایران
-define('SOURCE_DOMAIN', 'sv1.neurobuild.space'); // دامنه منبع آلمان
+define('SOURCE_DOMAIN', 'sv1.netwisehub.space'); // دامنه منبع آلمان
 define('PROXY_IP', '45.12.143.141'); // IP سرور ایران
 ```
 
@@ -51,7 +51,7 @@ define('PROXY_IP', '45.12.143.141'); // IP سرور ایران
 
 ```php
 // لینک اصلی
-$originalUrl = 'https://sv1.neurobuild.space/video.mp4';
+$originalUrl = 'https://sv1.netwisehub.space/video.mp4';
 
 // تبدیل به لینک پروکسی
 $proxyUrl = 'https://tr.modulogic.space/proxy.php?url=' . urlencode($originalUrl);
@@ -61,17 +61,17 @@ $proxyUrl = 'https://tr.modulogic.space/proxy.php?url=' . urlencode($originalUrl
 
 ```html
 <!-- لینک اصلی -->
-<a href="https://sv1.neurobuild.space/video.mp4">دانلود ویدیو</a>
+<a href="https://sv1.netwisehub.space/video.mp4">دانلود ویدیو</a>
 
 <!-- لینک پروکسی -->
-<a href="https://tr.modulogic.space/proxy.php?url=https%3A//sv1.neurobuild.space/video.mp4">دانلود ویدیو</a>
+<a href="https://tr.modulogic.space/proxy.php?url=https%3A//sv1.netwisehub.space/video.mp4">دانلود ویدیو</a>
 ```
 
 ### استفاده در JavaScript
 
 ```javascript
 // تبدیل خودکار لینک‌ها
-const originalUrl = 'https://sv1.neurobuild.space/video.mp4';
+const originalUrl = 'https://sv1.netwisehub.space/video.mp4';
 const proxyUrl = `https://tr.modulogic.space/proxy.php?url=${encodeURIComponent(originalUrl)}`;
 ```
 
@@ -111,30 +111,30 @@ define('LOG_LEVEL', 'INFO'); // DEBUG, INFO, WARNING, ERROR
 
 ```
 لینک اصلی:
-https://sv1.neurobuild.space/movies/action.mp4
+https://sv1.netwisehub.space/movies/action.mp4
 
 لینک پروکسی:
-https://tr.modulogic.space/proxy.php?url=https%3A//sv1.neurobuild.space/movies/action.mp4
+https://tr.modulogic.space/proxy.php?url=https%3A//sv1.netwisehub.space/movies/action.mp4
 ```
 
 ### مثال 2: لینک فایل فشرده
 
 ```
 لینک اصلی:
-https://sv1.neurobuild.space/files/archive.zip
+https://sv1.netwisehub.space/files/archive.zip
 
 لینک پروکسی:
-https://tr.modulogic.space/proxy.php?url=https%3A//sv1.neurobuild.space/files/archive.zip
+https://tr.modulogic.space/proxy.php?url=https%3A//sv1.netwisehub.space/files/archive.zip
 ```
 
 ### مثال 3: لینک مستند
 
 ```
 لینک اصلی:
-https://sv1.neurobuild.space/documents/report.pdf
+https://sv1.netwisehub.space/documents/report.pdf
 
 لینک پروکسی:
-https://tr.modulogic.space/proxy.php?url=https%3A//sv1.neurobuild.space/documents/report.pdf
+https://tr.modulogic.space/proxy.php?url=https%3A//sv1.netwisehub.space/documents/report.pdf
 ```
 
 ## 🛠️ پلاگین WordPress
@@ -148,8 +148,8 @@ https://tr.modulogic.space/proxy.php?url=https%3A//sv1.neurobuild.space/document
 ### تنظیمات پلاگین
 
 - **دامنه پروکسی**: `tr.modulogic.space`
-- **دامنه منبع**: `sv1.neurobuild.space`
-- **دامنه‌های مجاز**: `sv1.neurobuild.space`
+- **دامنه منبع**: `sv1.netwisehub.space`
+- **دامنه‌های مجاز**: `sv1.netwisehub.space`
 - **پسوندهای مجاز**: `mp4,avi,mkv,mov,wmv,flv,webm,m4v,zip,rar,7z`
 
 ### ویژگی‌های پلاگین

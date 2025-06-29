@@ -25,8 +25,8 @@ define('APL_PLUGIN_VERSION', '1.0.0');
 $default_settings = [
     'enabled' => true,
     'proxy_domain' => 'tr.modulogic.space',
-    'source_domain' => 'sv1.neurobuild.space',
-    'allowed_hosts' => ['sv1.neurobuild.space'],
+    'source_domain' => 'sv1.netwisehub.space',
+    'allowed_hosts' => ['sv1.netwisehub.space', 'sv1.neurobuild.space', 'serfil.me'],
     'allowed_extensions' => ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', 'm4v', 'zip', 'rar', '7z'],
     'debug_mode' => false,
     'auto_rewrite' => true,
