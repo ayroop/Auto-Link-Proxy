@@ -236,22 +236,20 @@ class VideoProxy {
         // حذف headers غیرضروری
         $skipHeaders = [
             'transfer-encoding', 'connection', 'keep-alive',
-            'proxy-authenticate', 'proxy-authorization'
+            'proxy-authenticate', 'proxy-authorization', 'content-disposition'
         ];
         
         foreach ($responseHeaders as $header) {
             $headerLower = strtolower($header);
             $shouldSkip = false;
-            
             foreach ($skipHeaders as $skip) {
                 if (strpos($headerLower, $skip) === 0) {
                     $shouldSkip = true;
                     break;
                 }
             }
-            
             if (!$shouldSkip) {
-                header($header);
+                header($header, false);
             }
         }
         
@@ -264,18 +262,18 @@ class VideoProxy {
         header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS');
         header('Access-Control-Allow-Headers: Range, If-Range, If-Modified-Since, If-None-Match');
 
-        // --- اضافه کردن Content-Disposition با نام فایل اصلی ---
+        // --- استخراج نام فایل به صورت هوشمند ---
         $filename = basename($filePath);
-        if (!$filename) {
-            $filename = 'video.mp4';
+        if (!$filename || strpos($filename, '.') === false) {
+            $urlParam = $_GET['url'] ?? '';
+            if ($urlParam) {
+                $parsed = parse_url($urlParam);
+                $filename = isset($parsed['path']) ? basename($parsed['path']) : '';
+            }
+            if (!$filename) $filename = 'video.mp4';
         }
-        // اگر کاربر می‌خواهد دانلود کند (یا برای دانلود منیجرها)
-        if (isset($_SERVER['HTTP_USER_AGENT']) && preg_match('/(MSIE|Trident|Edge|IDM|Download|wget|curl|Safari|Chrome|Firefox)/i', $_SERVER['HTTP_USER_AGENT'])) {
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-        } else {
-            // حالت پیش‌فرض: نمایش در مرورگر
-            header('Content-Disposition: inline; filename="' . $filename . '"');
-        }
+        // همیشه Content-Disposition را آخر بفرست
+        header('Content-Disposition: inline; filename="' . $filename . '"', true);
     }
     
     private function streamContent($stream) {
