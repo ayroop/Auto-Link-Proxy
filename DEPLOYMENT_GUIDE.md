@@ -10,14 +10,21 @@
 
 ## مرحله 1: اتصال و به‌روزرسانی اولیه
 
+### اتصال به سرور:
 ```bash
-# اتصال به سرور
 ssh root@185.235.196.22
+```
 
-# به‌روزرسانی سیستم
-apt update && apt upgrade -y
+### به‌روزرسانی سیستم:
+```bash
+apt update
+```
+```bash
+apt upgrade -y
+```
 
-# نصب پکیج‌های ضروری
+### نصب پکیج‌های ضروری:
+```bash
 apt install -y curl wget git unzip nginx php8.1-fpm php8.1-curl php8.1-mbstring certbot python3-certbot-nginx ufw fail2ban
 ```
 
@@ -25,11 +32,13 @@ apt install -y curl wget git unzip nginx php8.1-fpm php8.1-curl php8.1-mbstring 
 
 ## مرحله 2: پیکربندی Nginx (سبک‌تر از Apache)
 
+### حذف سایت پیش‌فرض:
 ```bash
-# حذف سایت پیش‌فرض
 rm /etc/nginx/sites-enabled/default
+```
 
-# ایجاد فایل سایت پروکسی
+### ایجاد فایل سایت پروکسی:
+```bash
 cat > /etc/nginx/sites-available/proxy << 'EOF'
 server {
     listen 80;
@@ -83,8 +92,10 @@ server {
     }
 }
 EOF
+```
 
-# فعال کردن سایت
+### فعال کردن سایت:
+```bash
 ln -s /etc/nginx/sites-available/proxy /etc/nginx/sites-enabled/
 ```
 
@@ -92,11 +103,13 @@ ln -s /etc/nginx/sites-available/proxy /etc/nginx/sites-enabled/
 
 ## مرحله 3: پیکربندی PHP برای پروکسی
 
+### ایجاد دایرکتوری سایت:
 ```bash
-# ایجاد دایرکتوری سایت
 mkdir -p /var/www/proxy
+```
 
-# تنظیم PHP برای فایل‌های بزرگ
+### تنظیم PHP برای فایل‌های بزرگ:
+```bash
 cat > /etc/php/8.1/fpm/conf.d/99-proxy.ini << 'EOF'
 memory_limit = 512M
 max_execution_time = 300
@@ -107,12 +120,22 @@ max_file_uploads = 100
 output_buffering = 4096
 implicit_flush = On
 EOF
+```
 
-# تنظیم PHP-FPM برای عملکرد بهتر
+### تنظیم PHP-FPM برای عملکرد بهتر:
+```bash
 sed -i 's/pm = dynamic/pm = ondemand/' /etc/php/8.1/fpm/pool.d/www.conf
+```
+```bash
 sed -i 's/pm.max_children = 5/pm.max_children = 10/' /etc/php/8.1/fpm/pool.d/www.conf
+```
+```bash
 sed -i 's/pm.start_servers = 2/pm.start_servers = 1/' /etc/php/8.1/fpm/pool.d/www.conf
+```
+```bash
 sed -i 's/pm.min_spare_servers = 1/pm.min_spare_servers = 0/' /etc/php/8.1/fpm/pool.d/www.conf
+```
+```bash
 sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 1/' /etc/php/8.1/fpm/pool.d/www.conf
 ```
 
@@ -120,28 +143,52 @@ sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 1/' /etc/php/8.1/fpm/p
 
 ## مرحله 4: آپلود فایل‌های پروکسی
 
+### رفتن به دایرکتوری سایت:
 ```bash
-# رفتن به دایرکتوری سایت
 cd /var/www/proxy
+```
 
-# کپی فایل‌های پروکسی (از طریق SCP یا wget)
-# اگر فایل‌ها در GitHub هستند:
+### آپلود فایل‌های پروکسی (انتخاب یکی از روش‌ها):
+
+#### روش 1: اگر فایل‌ها در GitHub هستند:
+```bash
 wget https://raw.githubusercontent.com/your-repo/main/proxy.php
+```
+```bash
 wget https://raw.githubusercontent.com/your-repo/main/config.php
+```
+```bash
 wget https://raw.githubusercontent.com/your-repo/main/test_proxy.html
+```
 
-# یا آپلود دستی از کامپیوتر محلی:
-# scp proxy.php config.php test_proxy.html root@185.235.196.22:/var/www/proxy/
+#### روش 2: آپلود دستی از کامپیوتر محلی:
+```bash
+# در ترمینال محلی خود اجرا کنید:
+scp proxy.php config.php test_proxy.html root@185.235.196.22:/var/www/proxy/
+```
 
-# تنظیم مجوزها
+### تنظیم مجوزها:
+```bash
 chown -R www-data:www-data /var/www/proxy
+```
+```bash
 chmod -R 755 /var/www/proxy
+```
+```bash
 chmod 644 /var/www/proxy/*.php
+```
+```bash
 chmod 644 /var/www/proxy/*.html
+```
 
-# ایجاد دایرکتوری لاگ
+### ایجاد دایرکتوری لاگ:
+```bash
 mkdir -p /var/www/proxy/logs
+```
+```bash
 chown www-data:www-data /var/www/proxy/logs
+```
+```bash
 chmod 755 /var/www/proxy/logs
 ```
 
@@ -149,11 +196,13 @@ chmod 755 /var/www/proxy/logs
 
 ## مرحله 5: نصب SSL
 
+### دریافت گواهی SSL:
 ```bash
-# دریافت گواهی SSL
 certbot --nginx -d filmkhabar.space -d www.filmkhabar.space --non-interactive --agree-tos --email your-email@example.com
+```
 
-# تنظیم تجدید خودکار
+### تنظیم تجدید خودکار:
+```bash
 echo "0 12 * * * /usr/bin/certbot renew --quiet" | crontab -
 ```
 
@@ -161,16 +210,28 @@ echo "0 12 * * * /usr/bin/certbot renew --quiet" | crontab -
 
 ## مرحله 6: پیکربندی فایروال
 
+### تنظیم UFW:
 ```bash
-# تنظیم UFW
 ufw default deny incoming
+```
+```bash
 ufw default allow outgoing
+```
+```bash
 ufw allow ssh
+```
+```bash
 ufw allow 80/tcp
+```
+```bash
 ufw allow 443/tcp
+```
+```bash
 ufw --force enable
+```
 
-# تنظیم Fail2ban
+### تنظیم Fail2ban:
+```bash
 cat > /etc/fail2ban/jail.local << 'EOF'
 [DEFAULT]
 bantime = 3600
@@ -191,8 +252,13 @@ port = http,https
 logpath = /var/log/nginx/error.log
 maxretry = 3
 EOF
+```
 
+### راه‌اندازی Fail2ban:
+```bash
 systemctl enable fail2ban
+```
+```bash
 systemctl start fail2ban
 ```
 
@@ -200,16 +266,24 @@ systemctl start fail2ban
 
 ## مرحله 7: راه‌اندازی سرویس‌ها
 
+### راه‌اندازی PHP-FPM:
 ```bash
-# راه‌اندازی PHP-FPM
 systemctl enable php8.1-fpm
+```
+```bash
 systemctl start php8.1-fpm
+```
 
-# راه‌اندازی Nginx
+### راه‌اندازی Nginx:
+```bash
 systemctl enable nginx
+```
+```bash
 systemctl start nginx
+```
 
-# بررسی وضعیت
+### بررسی وضعیت:
+```bash
 systemctl status nginx php8.1-fpm
 ```
 
@@ -217,18 +291,26 @@ systemctl status nginx php8.1-fpm
 
 ## مرحله 8: تست و بهینه‌سازی
 
+### تست اتصال:
 ```bash
-# تست اتصال
 curl -I http://filmkhabar.space/proxy.php
+```
 
-# تست SSL
+### تست SSL:
+```bash
 curl -I https://filmkhabar.space/proxy.php
+```
 
-# بررسی لاگ‌ها
+### بررسی لاگ‌ها:
+```bash
 tail -f /var/log/nginx/error.log
+```
+```bash
 tail -f /var/log/nginx/access.log
+```
 
-# بررسی استفاده از منابع
+### بررسی استفاده از منابع:
+```bash
 htop
 ```
 
@@ -236,8 +318,8 @@ htop
 
 ## مرحله 9: بهینه‌سازی برای پهنای باند نامحدود
 
+### تنظیمات شبکه برای عملکرد بهتر:
 ```bash
-# تنظیمات شبکه برای عملکرد بهتر
 cat >> /etc/sysctl.conf << 'EOF'
 # تنظیمات TCP برای عملکرد بهتر
 net.core.rmem_max = 16777216
@@ -247,11 +329,15 @@ net.ipv4.tcp_wmem = 4096 65536 16777216
 net.ipv4.tcp_congestion_control = bbr
 net.core.default_qdisc = fq
 EOF
+```
 
-# اعمال تنظیمات
+### اعمال تنظیمات:
+```bash
 sysctl -p
+```
 
-# تنظیمات Nginx برای عملکرد بهتر
+### تنظیمات Nginx برای عملکرد بهتر:
+```bash
 cat >> /etc/nginx/nginx.conf << 'EOF'
 # تنظیمات worker
 worker_processes auto;
@@ -287,8 +373,8 @@ EOF
 
 ## مرحله 10: نظارت ساده
 
+### ایجاد اسکریپت نظارت:
 ```bash
-# ایجاد اسکریپت نظارت
 cat > /usr/local/bin/monitor-proxy.sh << 'EOF'
 #!/bin/bash
 echo "=== گزارش پروکسی $(date) ==="
@@ -299,10 +385,15 @@ echo "Connections: $(netstat -an | grep :80 | wc -l)"
 echo "Bandwidth (last 5 min):"
 iftop -t -s 5 -L 10
 EOF
+```
 
+### تنظیم مجوز اسکریپت:
+```bash
 chmod +x /usr/local/bin/monitor-proxy.sh
+```
 
-# نصب iftop برای نظارت پهنای باند
+### نصب iftop برای نظارت پهنای باند:
+```bash
 apt install -y iftop
 ```
 
@@ -310,21 +401,34 @@ apt install -y iftop
 
 ## دستورات مفید
 
+### بررسی وضعیت سرویس‌ها:
 ```bash
-# بررسی وضعیت سرویس‌ها
 systemctl status nginx php8.1-fpm
+```
 
-# مشاهده لاگ‌های زنده
+### مشاهده لاگ‌های زنده:
+```bash
 tail -f /var/log/nginx/access.log
+```
 
-# نظارت بر پهنای باند
+### نظارت بر پهنای باند:
+```bash
 iftop
+```
 
-# بررسی فایل‌های پروکسی
+### بررسی فایل‌های پروکسی:
+```bash
 ls -la /var/www/proxy/
+```
 
-# تست پروکسی
+### تست پروکسی:
+```bash
 curl "https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/test.mp4"
+```
+
+### اجرای اسکریپت نظارت:
+```bash
+/usr/local/bin/monitor-proxy.sh
 ```
 
 ---
@@ -346,16 +450,33 @@ curl "https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/test.mp4
 ✅ **نظارت ساده**: اسکریپت‌های نظارت  
 
 ### در صورت مشکل:
+
+#### بررسی لاگ‌ها:
 ```bash
-# بررسی لاگ‌ها
 tail -f /var/log/nginx/error.log
+```
+```bash
 tail -f /var/log/php8.1-fpm.log
+```
 
-# راه‌اندازی مجدد سرویس‌ها
+#### راه‌اندازی مجدد سرویس‌ها:
+```bash
 systemctl restart nginx php8.1-fpm
+```
 
-# بررسی پورت‌ها
+#### بررسی پورت‌ها:
+```bash
 netstat -tlnp
+```
+
+#### بررسی وضعیت فایروال:
+```bash
+ufw status
+```
+
+#### بررسی وضعیت Fail2ban:
+```bash
+fail2ban-client status
 ```
 
 سرور شما آماده است! پروکسی روی `https://filmkhabar.space/proxy.php` در دسترس خواهد بود. 
