@@ -1,4 +1,4 @@
-# 🚀 راهنمای استقرار پروکسی PHP
+# 🚀 راهنمای استقرار پروکسی PHP - مرحله به مرحله
 
 راهنمای کامل استقرار پروکسی PHP برای دور زدن محدودیت‌های دانلود در ایران.
 
@@ -10,116 +10,207 @@
 
 ## 📋 پیش‌نیازها
 
-### سرور
-- Ubuntu 24.04 LTS
+- سرور Ubuntu 24.04 LTS
 - حداقل 1GB RAM
-- حداقل 10GB فضای دیسک
 - دسترسی root
-
-### دامنه
 - دامنه `tr.modulogic.space` اشاره به IP سرور
 - ایمیل معتبر برای گواهی SSL
 
-## 🔧 نصب و راه‌اندازی
+---
 
-### مرحله 1: به‌روزرسانی سیستم
+## مرحله 1: اتصال به سرور
 
 ```bash
-# به‌روزرسانی پکیج‌ها
-sudo apt update && sudo apt upgrade -y
-
-# نصب پکیج‌های ضروری
-sudo apt install -y curl wget git unzip
+ssh root@45.12.143.141
 ```
 
-### مرحله 2: نصب نرم‌افزارهای مورد نیاز
+---
+
+## مرحله 2: به‌روزرسانی سیستم
 
 ```bash
-# نصب Nginx
-sudo apt install -y nginx
-
-# نصب PHP 8.3 و ماژول‌های مورد نیاز
-sudo apt install -y php8.3-fpm php8.3-curl php8.3-mbstring php8.3-opcache php8.3-zip
-
-# نصب Certbot برای SSL
-sudo apt install -y certbot python3-certbot-nginx
-
-# نصب فایروال
-sudo apt install -y ufw fail2ban
+apt update && apt upgrade -y
 ```
 
-### مرحله 3: دانلود فایل‌های پروکسی
+```bash
+apt install -y curl wget git unzip
+```
+
+---
+
+## مرحله 3: نصب نرم‌افزارهای مورد نیاز
 
 ```bash
-# ایجاد پوشه پروکسی
-sudo mkdir -p /var/www/proxy
+apt install -y nginx
+```
+
+```bash
+apt install -y php8.3-fpm php8.3-curl php8.3-mbstring php8.3-opcache php8.3-zip
+```
+
+```bash
+apt install -y certbot python3-certbot-nginx
+```
+
+```bash
+apt install -y ufw fail2ban
+```
+
+---
+
+## مرحله 4: ایجاد پوشه پروکسی
+
+```bash
+mkdir -p /var/www/proxy
 cd /var/www/proxy
+```
 
-# دانلود فایل‌های اصلی
-sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/proxy.php
-sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/config.php
-sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/test_proxy.html
-sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/link_rewriter.php
-sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/php_settings.ini
-sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/.htaccess
+---
 
-# دانلود فایل‌های سرور
-sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/deploy.sh
-sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/deploy-ubuntu24.sh
+## مرحله 5: دانلود فایل‌های اصلی
 
-# دانلود فایل‌های پلاگین WordPress
-sudo mkdir -p /var/www/proxy/wordpress-plugin
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/proxy.php
+```
+
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/config.php
+```
+
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/test_proxy.html
+```
+
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/link_rewriter.php
+```
+
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/php_settings.ini
+```
+
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/.htaccess
+```
+
+---
+
+## مرحله 6: دانلود فایل‌های سرور
+
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/deploy.sh
+```
+
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/deploy-ubuntu24.sh
+```
+
+---
+
+## مرحله 7: دانلود پلاگین WordPress
+
+```bash
+mkdir -p /var/www/proxy/wordpress-plugin
 cd /var/www/proxy/wordpress-plugin
-sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/auto-proxy-links.php
-sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/uninstall.php
+```
 
-# دانلود فایل‌های admin
-sudo mkdir -p /var/www/proxy/wordpress-plugin/admin
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/auto-proxy-links.php
+```
+
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/uninstall.php
+```
+
+```bash
+mkdir -p /var/www/proxy/wordpress-plugin/admin
 cd /var/www/proxy/wordpress-plugin/admin
-sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/admin/admin-page.php
+```
 
-# دانلود فایل‌های assets
-sudo mkdir -p /var/www/proxy/wordpress-plugin/assets/js
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/admin/admin-page.php
+```
+
+```bash
+mkdir -p /var/www/proxy/wordpress-plugin/assets/js
 cd /var/www/proxy/wordpress-plugin/assets/js
-sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/assets/js/auto-proxy-links.js
+```
 
-# دانلود فایل‌های languages
-sudo mkdir -p /var/www/proxy/wordpress-plugin/languages
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/assets/js/auto-proxy-links.js
+```
+
+```bash
+mkdir -p /var/www/proxy/wordpress-plugin/languages
 cd /var/www/proxy/wordpress-plugin/languages
-sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/languages/auto-proxy-links-fa_IR.po
+```
 
-# بازگشت به پوشه اصلی
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/languages/auto-proxy-links-fa_IR.po
+```
+
+```bash
 cd /var/www/proxy
 ```
 
-### مرحله 4: تنظیم مجوزها
+---
+
+## مرحله 8: تنظیم مجوزها
 
 ```bash
-# تنظیم مالکیت
-sudo chown -R www-data:www-data /var/www/proxy
-
-# تنظیم مجوزها
-sudo chmod -R 755 /var/www/proxy
-sudo chmod 644 /var/www/proxy/*.php
-sudo chmod 644 /var/www/proxy/*.html
-sudo chmod 644 /var/www/proxy/.htaccess
-sudo chmod 644 /var/www/proxy/php_settings.ini
-
-# ایجاد پوشه لاگ
-sudo mkdir -p /var/www/proxy/logs
-sudo touch /var/www/proxy/logs/proxy_log.txt
-sudo chmod 755 /var/www/proxy/logs
-sudo chmod 666 /var/www/proxy/logs/proxy_log.txt
+chown -R www-data:www-data /var/www/proxy
 ```
 
-### مرحله 5: تنظیم Nginx
+```bash
+chmod -R 755 /var/www/proxy
+```
 
 ```bash
-# حذف سایت پیش‌فرض
-sudo rm -f /etc/nginx/sites-enabled/default
+chmod 644 /var/www/proxy/*.php
+```
 
-# ایجاد فایل سایت پروکسی
-sudo tee /etc/nginx/sites-available/proxy > /dev/null << 'EOF'
+```bash
+chmod 644 /var/www/proxy/*.html
+```
+
+```bash
+chmod 644 /var/www/proxy/.htaccess
+```
+
+```bash
+chmod 644 /var/www/proxy/php_settings.ini
+```
+
+```bash
+mkdir -p /var/www/proxy/logs
+```
+
+```bash
+touch /var/www/proxy/logs/proxy_log.txt
+```
+
+```bash
+chmod 755 /var/www/proxy/logs
+```
+
+```bash
+chmod 666 /var/www/proxy/logs/proxy_log.txt
+```
+
+---
+
+## مرحله 9: حذف سایت پیش‌فرض Nginx
+
+```bash
+rm -f /etc/nginx/sites-enabled/default
+```
+
+---
+
+## مرحله 10: ایجاد فایل سایت پروکسی
+
+```bash
+cat > /etc/nginx/sites-available/proxy << 'EOF'
 server {
     listen 80;
     server_name tr.modulogic.space;
@@ -172,22 +263,30 @@ server {
     }
 }
 EOF
-
-# فعال‌سازی سایت
-sudo ln -sf /etc/nginx/sites-available/proxy /etc/nginx/sites-enabled/
-
-# تست تنظیمات Nginx
-sudo nginx -t
-
-# راه‌اندازی مجدد Nginx
-sudo systemctl restart nginx
 ```
 
-### مرحله 6: تنظیم PHP
+---
+
+## مرحله 11: فعال‌سازی سایت
 
 ```bash
-# تنظیمات PHP برای فایل‌های بزرگ
-sudo tee /etc/php/8.3/fpm/conf.d/99-proxy.ini > /dev/null << 'EOF'
+ln -sf /etc/nginx/sites-available/proxy /etc/nginx/sites-enabled/
+```
+
+---
+
+## مرحله 12: تست تنظیمات Nginx
+
+```bash
+nginx -t
+```
+
+---
+
+## مرحله 13: تنظیم PHP برای فایل‌های بزرگ
+
+```bash
+cat > /etc/php/8.3/fpm/conf.d/99-proxy.ini << 'EOF'
 ; PHP settings for large files
 memory_limit = 2G
 max_execution_time = 0
@@ -197,41 +296,98 @@ upload_max_filesize = 10G
 max_file_uploads = 100
 default_socket_timeout = 300
 EOF
-
-# بهینه‌سازی PHP-FPM
-sudo sed -i 's/pm = dynamic/pm = ondemand/' /etc/php/8.3/fpm/pool.d/www.conf
-sudo sed -i 's/pm.max_children = 5/pm.max_children = 10/' /etc/php/8.3/fpm/pool.d/www.conf
-sudo sed -i 's/pm.start_servers = 2/pm.start_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
-sudo sed -i 's/pm.min_spare_servers = 1/pm.min_spare_servers = 0/' /etc/php/8.3/fpm/pool.d/www.conf
-sudo sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
-
-# راه‌اندازی مجدد PHP-FPM
-sudo systemctl restart php8.3-fpm
 ```
 
-### مرحله 7: تنظیم SSL
+---
+
+## مرحله 14: بهینه‌سازی PHP-FPM
 
 ```bash
-# دریافت گواهی SSL
-sudo certbot --nginx -d tr.modulogic.space --non-interactive --agree-tos --email your-email@example.com --quiet
-
-# تنظیم تجدید خودکار SSL
-echo "0 12 * * * /usr/bin/certbot renew --quiet" | sudo crontab -
+sed -i 's/pm = dynamic/pm = ondemand/' /etc/php/8.3/fpm/pool.d/www.conf
 ```
 
-### مرحله 8: تنظیم فایروال
+```bash
+sed -i 's/pm.max_children = 5/pm.max_children = 10/' /etc/php/8.3/fpm/pool.d/www.conf
+```
 
 ```bash
-# تنظیم UFW
-sudo ufw default deny incoming
-sudo ufw default allow outgoing
-sudo ufw allow ssh
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw --force enable
+sed -i 's/pm.start_servers = 2/pm.start_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
+```
 
-# تنظیم Fail2ban
-sudo tee /etc/fail2ban/jail.local > /dev/null << 'EOF'
+```bash
+sed -i 's/pm.min_spare_servers = 1/pm.min_spare_servers = 0/' /etc/php/8.3/fpm/pool.d/www.conf
+```
+
+```bash
+sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
+```
+
+---
+
+## مرحله 15: راه‌اندازی مجدد PHP-FPM
+
+```bash
+systemctl restart php8.3-fpm
+```
+
+---
+
+## مرحله 16: راه‌اندازی مجدد Nginx
+
+```bash
+systemctl restart nginx
+```
+
+---
+
+## مرحله 17: تنظیم SSL (جایگزین your-email@example.com با ایمیل خود)
+
+```bash
+certbot --nginx -d tr.modulogic.space --non-interactive --agree-tos --email your-email@example.com --quiet
+```
+
+---
+
+## مرحله 18: تنظیم تجدید خودکار SSL
+
+```bash
+echo "0 12 * * * /usr/bin/certbot renew --quiet" | crontab -
+```
+
+---
+
+## مرحله 19: تنظیم فایروال
+
+```bash
+ufw default deny incoming
+```
+
+```bash
+ufw default allow outgoing
+```
+
+```bash
+ufw allow ssh
+```
+
+```bash
+ufw allow 80/tcp
+```
+
+```bash
+ufw allow 443/tcp
+```
+
+```bash
+ufw --force enable
+```
+
+---
+
+## مرحله 20: تنظیم Fail2ban
+
+```bash
+cat > /etc/fail2ban/jail.local << 'EOF'
 [DEFAULT]
 bantime = 3600
 findtime = 600
@@ -258,16 +414,22 @@ port = http,https
 logpath = /var/log/nginx/access.log
 maxretry = 2
 EOF
-
-sudo systemctl enable fail2ban
-sudo systemctl start fail2ban
 ```
 
-### مرحله 9: بهینه‌سازی سیستم
+```bash
+systemctl enable fail2ban
+```
 
 ```bash
-# بهینه‌سازی شبکه
-sudo tee -a /etc/sysctl.conf > /dev/null << 'EOF'
+systemctl start fail2ban
+```
+
+---
+
+## مرحله 21: بهینه‌سازی شبکه
+
+```bash
+cat >> /etc/sysctl.conf << 'EOF'
 # TCP optimizations for unlimited bandwidth
 net.core.rmem_max = 16777216
 net.core.wmem_max = 16777216
@@ -278,16 +440,18 @@ net.core.default_qdisc = fq
 net.core.netdev_max_backlog = 5000
 net.ipv4.tcp_max_syn_backlog = 2048
 EOF
-
-# اعمال تنظیمات
-sudo sysctl -p
 ```
 
-### مرحله 10: ایجاد اسکریپت مانیتورینگ
+```bash
+sysctl -p
+```
+
+---
+
+## مرحله 22: ایجاد اسکریپت مانیتورینگ
 
 ```bash
-# ایجاد اسکریپت مانیتورینگ
-sudo tee /usr/local/bin/monitor-proxy.sh > /dev/null << 'EOF'
+cat > /usr/local/bin/monitor-proxy.sh << 'EOF'
 #!/bin/bash
 echo "=== Auto-Link-Proxy Status Report $(date) ==="
 echo "CPU Usage: $(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)%"
@@ -305,127 +469,85 @@ echo ""
 echo "Recent Nginx Errors:"
 tail -5 /var/log/nginx/error.log 2>/dev/null || echo "No errors found"
 EOF
-
-sudo chmod +x /usr/local/bin/monitor-proxy.sh
 ```
-
-## 🧪 تست استقرار
-
-### تست HTTP
 
 ```bash
-# تست اتصال HTTP
-curl -I http://tr.modulogic.space/proxy.php
-
-# تست عملکرد پروکسی
-curl "http://tr.modulogic.space/proxy.php?url=https://httpbin.org/status/200"
+chmod +x /usr/local/bin/monitor-proxy.sh
 ```
-
-### تست HTTPS
-
-```bash
-# تست اتصال HTTPS
-curl -I https://tr.modulogic.space/proxy.php
-
-# تست عملکرد پروکسی HTTPS
-curl "https://tr.modulogic.space/proxy.php?url=https://httpbin.org/status/200"
-```
-
-### تست صفحه
-
-```bash
-# تست صفحه تست
-curl -I https://tr.modulogic.space/test_proxy.html
-```
-
-## 📊 مانیتورینگ و نگهداری
-
-### دستورات مفید
-
-```bash
-# بررسی وضعیت سرویس‌ها
-sudo systemctl status nginx php8.3-fpm
-
-# راه‌اندازی مجدد سرویس‌ها
-sudo systemctl restart nginx php8.3-fpm
-
-# بررسی لاگ‌ها
-sudo tail -f /var/www/proxy/logs/proxy_log.txt
-sudo tail -f /var/log/nginx/error.log
-
-# اجرای اسکریپت مانیتورینگ
-sudo /usr/local/bin/monitor-proxy.sh
-
-# بررسی گواهی SSL
-sudo certbot certificates
-
-# بررسی فایروال
-sudo ufw status
-```
-
-### به‌روزرسانی خودکار
-
-```bash
-# ایجاد اسکریپت به‌روزرسانی
-sudo tee /usr/local/bin/update-proxy.sh > /dev/null << 'EOF'
-#!/bin/bash
-cd /var/www/proxy
-sudo wget -O proxy.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/proxy.php
-sudo wget -O config.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/config.php
-sudo wget -O test_proxy.html https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/test_proxy.html
-sudo chown www-data:www-data *.php *.html
-sudo chmod 644 *.php *.html
-sudo systemctl reload nginx
-echo "Proxy updated successfully!"
-EOF
-
-sudo chmod +x /usr/local/bin/update-proxy.sh
-```
-
-## 🔧 عیب‌یابی
-
-### مشکلات رایج
-
-#### خطای 502 Bad Gateway
-```bash
-# بررسی وضعیت PHP-FPM
-sudo systemctl status php8.3-fpm
-
-# بررسی لاگ‌های PHP-FPM
-sudo tail -f /var/log/php8.3-fpm.log
-```
-
-#### خطای SSL
-```bash
-# بررسی گواهی SSL
-sudo certbot certificates
-
-# تجدید دستی گواهی
-sudo certbot renew --dry-run
-```
-
-#### خطای مجوز
-```bash
-# تنظیم مجدد مجوزها
-sudo chown -R www-data:www-data /var/www/proxy
-sudo chmod -R 755 /var/www/proxy
-```
-
-## 📞 پشتیبانی
-
-### آدرس‌های مهم
-
-- **پروکسی**: https://tr.modulogic.space/proxy.php
-- **صفحه تست**: https://tr.modulogic.space/test_proxy.html
-- **مخزن GitHub**: https://github.com/ayroop/Auto-Link-Proxy
-
-### لاگ‌های مهم
-
-- `/var/www/proxy/logs/proxy_log.txt` - لاگ‌های پروکسی
-- `/var/log/nginx/access.log` - لاگ‌های دسترسی Nginx
-- `/var/log/nginx/error.log` - لاگ‌های خطای Nginx
-- `/var/log/php8.3-fpm.log` - لاگ‌های PHP-FPM
 
 ---
 
-**نکته**: این راهنما برای استقرار کامل و امن پروکسی PHP طراحی شده است. لطفاً تمام مراحل را با دقت دنبال کنید.
+## مرحله 23: تست استقرار
+
+```bash
+sleep 5
+```
+
+```bash
+curl -I http://tr.modulogic.space/proxy.php
+```
+
+```bash
+curl "http://tr.modulogic.space/proxy.php?url=https://httpbin.org/status/200"
+```
+
+```bash
+curl -I http://tr.modulogic.space/test_proxy.html
+```
+
+---
+
+## مرحله 24: تست HTTPS
+
+```bash
+curl -I https://tr.modulogic.space/proxy.php
+```
+
+```bash
+curl "https://tr.modulogic.space/proxy.php?url=https://httpbin.org/status/200"
+```
+
+```bash
+curl -I https://tr.modulogic.space/test_proxy.html
+```
+
+---
+
+## ✅ استقرار کامل شد!
+
+### آدرس‌های مهم:
+- **پروکسی**: https://tr.modulogic.space/proxy.php
+- **صفحه تست**: https://tr.modulogic.space/test_proxy.html
+
+### دستورات مفید:
+
+```bash
+# بررسی وضعیت سرویس‌ها
+systemctl status nginx php8.3-fpm
+
+# راه‌اندازی مجدد سرویس‌ها
+systemctl restart nginx php8.3-fpm
+
+# بررسی لاگ‌ها
+tail -f /var/www/proxy/logs/proxy_log.txt
+tail -f /var/log/nginx/error.log
+
+# اجرای اسکریپت مانیتورینگ
+/usr/local/bin/monitor-proxy.sh
+
+# بررسی گواهی SSL
+certbot certificates
+
+# بررسی فایروال
+ufw status
+```
+
+### مثال استفاده:
+```
+لینک اصلی: https://sv1.neurobuild.space/video.mp4
+لینک پروکسی: https://tr.modulogic.space/proxy.php?url=https%3A//sv1.neurobuild.space/video.mp4
+```
+
+---
+
+**نکته**: تمام دستورات را مرحله به مرحله اجرا کنید. در صورت بروز خطا، لاگ‌ها را بررسی کنید.
