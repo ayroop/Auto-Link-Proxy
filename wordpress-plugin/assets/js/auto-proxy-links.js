@@ -10,7 +10,7 @@
     const settings = window.apl_settings || {
         source_domain: 'sv1.neurobuild.space',
         proxy_domain: 'filmkhabar.space',
-        proxy_ip: '185.235.196.22',
+        proxy_ip: '45.12.143.141',
         proxy_path: '/proxy.php',
         show_info: true
     };

@@ -8,7 +8,7 @@
 // Domain and proxy settings
 define('SOURCE_DOMAIN', 'sv1.neurobuild.space'); // دامنه منبع اصلی
 define('PROXY_DOMAIN', 'filmkhabar.space'); // دامنه پروکسی ایرانی
-define('PROXY_IP', '185.235.196.22'); // IP اختصاصی سرور ایرانی
+define('PROXY_IP', '45.12.143.141'); // IP اختصاصی سرور ایرانی
 
 // تنظیمات مسیر
 // Path settings
@@ -33,7 +33,7 @@ define('LOG_LEVEL', 'INFO'); // DEBUG, INFO, WARNING, ERROR
 
 // تنظیمات امنیت
 // Security settings
-define('ALLOWED_HOSTS', ['sv1.neurobuild.space', 'filmkhabar.space', '185.235.196.22']);
+define('ALLOWED_HOSTS', ['sv1.neurobuild.space', 'filmkhabar.space', '45.12.143.141']);
 define('BLOCKED_EXTENSIONS', ['php', 'php3', 'php4', 'php5', 'phtml', 'asp', 'aspx', 'jsp', 'exe', 'bat', 'cmd']);
 
 // تنظیمات WordPress
@@ -56,7 +56,7 @@ const ALLOWED_HOSTS = [
 
 // آدرس پروکسی (دامنه ایران)
 const PROXY_DOMAIN = 'sv5.filmkhabar.space';
-const PROXY_IP = '185.235.196.22'; // IP اختصاصی شما
+const PROXY_IP = '45.12.143.141'; // IP اختصاصی شما
 const PROXY_SCRIPT = 'proxy.php';
 
 // انتخاب آدرس پروکسی (دامنه یا IP)

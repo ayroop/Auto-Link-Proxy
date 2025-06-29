@@ -51,7 +51,7 @@ $settings = get_option('auto_proxy_links_settings', array());
                         <label for="proxy_ip">IP اختصاصی</label>
                     </th>
                     <td>
-                        <input type="text" id="proxy_ip" name="auto_proxy_links_settings[proxy_ip]" value="<?php echo esc_attr($settings['proxy_ip'] ?? '185.235.196.22'); ?>" class="regular-text">
+                        <input type="text" id="proxy_ip" name="auto_proxy_links_settings[proxy_ip]" value="<?php echo esc_attr($settings['proxy_ip'] ?? '45.12.143.141'); ?>" class="regular-text">
                         <p class="description">IP اختصاصی سرور ایران</p>
                     </td>
                 </tr>

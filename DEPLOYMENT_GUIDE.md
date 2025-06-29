@@ -12,7 +12,7 @@
 
 ### اتصال به سرور:
 ```bash
-ssh root@185.235.196.22
+ssh root@45.12.143.141
 ```
 
 ### به‌روزرسانی سیستم:
@@ -164,7 +164,7 @@ wget https://raw.githubusercontent.com/your-repo/main/test_proxy.html
 #### روش 2: آپلود دستی از کامپیوتر محلی:
 ```bash
 # در ترمینال محلی خود اجرا کنید:
-scp proxy.php config.php test_proxy.html root@185.235.196.22:/var/www/proxy/
+scp proxy.php config.php test_proxy.html root@45.12.143.141:/var/www/proxy/
 ```
 
 ### تنظیم مجوزها:

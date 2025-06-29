@@ -8,7 +8,7 @@ header('Content-Type: text/html; charset=utf-8');
 // تنظیمات
 $source_domain = 'sv1.neurobuild.space';
 $proxy_domain = 'filmkhabar.space';
-$proxy_ip = '185.235.196.22';
+$proxy_ip = '45.12.143.141';
 
 echo "<h1>🧪 تست IP و دامنه</h1>";
 echo "<p><strong>دامنه منبع:</strong> $source_domain</p>";

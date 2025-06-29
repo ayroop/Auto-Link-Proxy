@@ -19,7 +19,7 @@ const USE_IP_INSTEAD_OF_DOMAIN = true;
 ```
 **لینک‌های تولید شده:**
 ```
-https://185.235.196.22/proxy.php?url=...
+https://45.12.143.141/proxy.php?url=...
 ```
 
 ---
@@ -74,7 +74,7 @@ https://filmkhabar.space/test_proxy.html
 
 ### تست با IP:
 ```
-https://185.235.196.22/test_proxy.html
+https://45.12.143.141/test_proxy.html
 ```
 
 ### تست مستقیم پروکسی:
@@ -87,7 +87,7 @@ https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/h2/movie/sv1/t
 ## 📊 اطلاعات سرور
 
 - **دامنه:** filmkhabar.space
-- **IP اختصاصی:** 185.235.196.22
+- **IP اختصاصی:** 45.12.143.141
 - **پینگ:** ~178ms
 - **موقعیت:** ایران
 

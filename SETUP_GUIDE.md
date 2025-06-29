@@ -13,7 +13,7 @@
 
 ### اطلاعات سرور:
 - **دامنه:** filmkhabar.space
-- **IP اختصاصی:** 185.235.196.22
+- **IP اختصاصی:** 45.12.143.141
 - **پینگ:** ~178ms (متوسط)
 
 ---
@@ -32,7 +32,7 @@
 در فایل `config.php` تنظیمات زیر را بررسی کنید:
 ```php
 const PROXY_DOMAIN = 'filmkhabar.space'; // دامنه واقعی شما
-const PROXY_IP = '185.235.196.22'; // IP اختصاصی شما
+const PROXY_IP = '45.12.143.141'; // IP اختصاصی شما
 const USE_IP_INSTEAD_OF_DOMAIN = false; // true برای استفاده از IP
 ```
 
@@ -102,7 +102,7 @@ https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/h2/movie/file.
 ```
 یا با IP:
 ```
-https://185.235.196.22/proxy.php?url=https://sv1.cinetory.space/h2/movie/file.mp4
+https://45.12.143.141/proxy.php?url=https://sv1.cinetory.space/h2/movie/file.mp4
 ```
 
 ### روش 2: بازنویسی خودکار

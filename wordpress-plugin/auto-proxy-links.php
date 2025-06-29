@@ -25,7 +25,7 @@ define('APL_PLUGIN_VERSION', '1.0.0');
 $default_settings = [
     'source_domain' => 'sv1.neurobuild.space',
     'proxy_domain' => 'filmkhabar.space',
-    'proxy_ip' => '185.235.196.22',
+    'proxy_ip' => '45.12.143.141',
     'proxy_path' => '/proxy.php',
     'enable_posts' => true,
     'enable_pages' => true,

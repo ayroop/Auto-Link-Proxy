@@ -17,7 +17,7 @@
 
 ## 🎯 معرفی
 
-این پروژه یک سیستم کامل پروکسی است که فایل‌های ویدیو و سریال را از سرور خارجی `sv1.neurobuild.space` از طریق سرور ایرانی `filmkhabar.space` با IP اختصاصی `185.235.196.22` پروکسی می‌کند تا کاربران ایرانی بتوانند بدون محدودیت دانلود کنند.
+این پروژه یک سیستم کامل پروکسی است که فایل‌های ویدیو و سریال را از سرور خارجی `sv1.neurobuild.space` از طریق سرور ایرانی `filmkhabar.space` با IP اختصاصی `45.12.143.141` پروکسی می‌کند تا کاربران ایرانی بتوانند بدون محدودیت دانلود کنند.
 
 ### 🔧 اجزای سیستم
 
@@ -88,7 +88,7 @@ sudo bash deploy.sh
 
 ```bash
 # اتصال به سرور
-ssh root@185.235.196.22
+ssh root@45.12.143.141
 
 # دانلود اسکریپت
 wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/deploy.sh
@@ -273,7 +273,7 @@ curl -I https://filmkhabar.space/proxy.php/test.mp4
 // تنظیمات دامنه
 define('SOURCE_DOMAIN', 'sv1.neurobuild.space');
 define('PROXY_DOMAIN', 'filmkhabar.space');
-define('PROXY_IP', '185.235.196.22');
+define('PROXY_IP', '45.12.143.141');
 
 // تنظیمات فایل‌های بزرگ
 define('MAX_FILE_SIZE', 10 * 1024 * 1024 * 1024); // 10GB
@@ -373,7 +373,7 @@ $rewritten = rewriteContent($content);
 
 ```php
 // دامنه‌های مجاز
-define('ALLOWED_HOSTS', ['sv1.neurobuild.space', 'filmkhabar.space', '185.235.196.22']);
+define('ALLOWED_HOSTS', ['sv1.neurobuild.space', 'filmkhabar.space', '45.12.143.141']);
 
 // پسوندهای مسدود
 define('BLOCKED_EXTENSIONS', ['php', 'php3', 'php4', 'php5', 'phtml', 'asp', 'aspx', 'jsp', 'exe', 'bat', 'cmd']);
