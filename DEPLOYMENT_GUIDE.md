@@ -25,7 +25,7 @@ apt upgrade -y
 
 ### نصب پکیج‌های ضروری:
 ```bash
-apt install -y curl wget git unzip nginx php8.1-fpm php8.1-curl php8.1-mbstring certbot python3-certbot-nginx ufw fail2ban
+apt install -y curl wget git unzip nginx php8.3-fpm php8.3-curl php8.3-mbstring php8.3-opcache certbot python3-certbot-nginx ufw fail2ban htop iftop net-tools
 ```
 
 ---
