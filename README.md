@@ -1,398 +1,377 @@
-# Auto Link Proxy
+# 🎬 پروکسی ویدیو - filmkhabar.space
 
-[![PHP Version](https://img.shields.io/badge/PHP-7.4%2B-blue.svg)](https://php.net)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![GitHub release](https://img.shields.io/github/release/ayroop/Auto-Link-Proxy.svg)](https://github.com/ayroop/Auto-Link-Proxy/releases)
-[![GitHub issues](https://img.shields.io/github/issues/ayroop/Auto-Link-Proxy.svg)](https://github.com/ayroop/Auto-Link-Proxy/issues)
-[![GitHub stars](https://img.shields.io/github/stars/ayroop/Auto-Link-Proxy.svg)](https://github.com/ayroop/Auto-Link-Proxy/stargazers)
+یک سیستم کامل پروکسی برای عبور از محدودیت‌های دانلود فایل‌های ویدیو و سریال از طریق سرور ایرانی
 
-A powerful PHP proxy solution designed to bypass download restrictions for Iranian users by proxying files from external servers through Iranian servers. Includes a WordPress plugin for automatic link conversion.
+## 📋 فهرست مطالب
 
-## 🌟 Features
-
-### Core Proxy Functionality
-- ✅ **Secure File Proxying**: Proxy files through Iranian servers
-- ✅ **Large File Support**: Handle files up to 10GB (4K videos)
-- ✅ **Resume Downloads**: Support for range requests
-- ✅ **Multiple Formats**: Support for mp4, avi, mkv, mov, wmv, flv, webm, m4v, ts, mts, m2ts
-- ✅ **Memory Optimization**: Efficient handling of large video files
-- ✅ **SSL/TLS Support**: Full HTTPS support
-
-### Security Features
-- 🔒 **Domain Whitelisting**: Only allow specific domains
-- 🔒 **File Extension Filtering**: Restrict file types
-- 🔒 **Input Validation**: Sanitize all inputs
-- 🔒 **Rate Limiting**: Prevent abuse
-- 🔒 **Error Handling**: Secure error messages
-
-### WordPress Integration
-- 🚀 **Automatic Link Conversion**: Convert direct links automatically
-- 🚀 **Shortcode Support**: Manual link conversion
-- 🚀 **Admin Panel**: Easy configuration interface
-- 🚀 **Persian UI**: Full Persian language support
-- 🚀 **Connection Testing**: Built-in proxy testing
-- 🚀 **Debug Mode**: Development assistance
-
-## 📋 Table of Contents
-
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Configuration](#configuration)
+- [معرفی](#معرفی)
+- [ویژگی‌ها](#ویژگی‌ها)
+- [نصب و راه‌اندازی](#نصب-و-راه‌اندازی)
+- [تنظیمات](#تنظیمات)
+- [استفاده](#استفاده)
 - [WordPress Plugin](#wordpress-plugin)
-- [Usage Examples](#usage-examples)
-- [API Reference](#api-reference)
-- [Security](#security)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [Support](#support)
+- [امنیت](#امنیت)
+- [عیب‌یابی](#عیب‌یابی)
+- [پشتیبانی](#پشتیبانی)
 
-## 🚀 Installation
+## 🎯 معرفی
 
-### Prerequisites
+این پروژه یک سیستم کامل پروکسی است که فایل‌های ویدیو و سریال را از سرور خارجی `sv1.neurobuild.space` از طریق سرور ایرانی `filmkhabar.space` با IP اختصاصی `185.235.196.22` پروکسی می‌کند تا کاربران ایرانی بتوانند بدون محدودیت دانلود کنند.
 
-- PHP 7.4 or higher
-- Apache/Nginx web server
-- cURL extension enabled
-- SSL certificate (recommended)
+### 🔧 اجزای سیستم
 
-### Quick Installation
+- **`proxy.php`**: اسکریپت اصلی پروکسی
+- **`config.php`**: تنظیمات مرکزی
+- **`link_rewriter.php`**: بازنویسی خودکار لینک‌ها
+- **WordPress Plugin**: پلاگین خودکار برای وردپرس
+- **فایل‌های تست**: برای بررسی عملکرد
 
-1. **Clone the repository:**
+## ✨ ویژگی‌ها
+
+### 🚀 عملکرد
+- **پشتیبانی از فایل‌های بزرگ**: تا 10GB
+- **Resume دانلود**: پشتیبانی کامل از HTTP Range
+- **سرعت بالا**: بافر بهینه و انتقال مستقیم
+- **کش هوشمند**: کاهش بار سرور
+
+### 🛡️ امنیت
+- **فیلتر دامنه**: فقط دامنه‌های مجاز
+- **فیلتر پسوند**: مسدود کردن فایل‌های خطرناک
+- **لاگ کامل**: ثبت تمام فعالیت‌ها
+- **محدودیت اندازه**: جلوگیری از سوء استفاده
+
+### 🔗 یکپارچگی
+- **WordPress Plugin**: تبدیل خودکار لینک‌ها
+- **شورت‌کد**: استفاده آسان در محتوا
+- **AJAX**: تست اتصال بدون reload
+- **Responsive**: سازگار با همه دستگاه‌ها
+
+## 📦 نصب و راه‌اندازی
+
+### پیش‌نیازها
+
+```bash
+# PHP 7.4 یا بالاتر
+php -v
+
+# افزونه‌های PHP مورد نیاز
+- curl
+- openssl
+- mbstring
+```
+
+### 1. آپلود فایل‌ها
+
+```bash
+# آپلود فایل‌های اصلی
+proxy.php
+config.php
+link_rewriter.php
+test_proxy.html
+
+# آپلود تنظیمات PHP
+php_settings.ini
+.htaccess
+```
+
+### 2. تنظیم مجوزها
+
    ```bash
-   git clone https://github.com/ayroop/Auto-Link-Proxy.git
-   cd Auto-Link-Proxy
-   ```
+# تنظیم مجوز فایل لاگ
+chmod 666 proxy_log.txt
 
-2. **Configure your server:**
-   ```bash
-   # Copy configuration file
-   cp config.php config.local.php
-   # Edit with your settings
-   nano config.local.php
-   ```
-
-3. **Set up web server:**
-   ```bash
-   # For Apache, copy .htaccess
-   cp .htaccess /var/www/html/
-   
-   # For Nginx, use the provided configuration
-   sudo cp nginx.conf /etc/nginx/sites-available/auto-link-proxy
-   ```
-
-4. **Test the installation:**
-   ```bash
-   # Open in browser
-   http://your-domain.com/test_proxy.html
-   ```
-
-## ⚡ Quick Start
-
-### Basic Usage
-
-1. **Direct Proxy Access:**
-   ```
-   https://your-domain.com/proxy.php?url=https://sv1.cinetory.space/file.mp4
-   ```
-
-2. **WordPress Integration:**
-   - Install the WordPress plugin from `wordpress-plugin/`
-   - Activate the plugin
-   - Configure settings in WordPress admin
-   - Links are automatically converted
-
-3. **Manual Link Conversion:**
-   ```php
-   // Using link_rewriter.php
-   $proxy_url = convertToProxyUrl('https://sv1.cinetory.space/file.mp4');
-   ```
-
-### Example Configuration
-
-```php
-// config.php
-$config = [
-    'proxy_domain' => 'filmkhabar.space',
-    'proxy_ip' => '185.235.196.22',
-    'use_ip' => false,
-    'allowed_hosts' => ['sv1.cinetory.space'],
-    'allowed_extensions' => ['mp4', 'avi', 'mkv', 'mov'],
-    'max_file_size' => '10G',
-    'memory_limit' => '512M',
-    'timeout' => 300,
-    'buffer_size' => 1048576,
-    'enable_logging' => true,
-    'log_file' => 'proxy.log'
-];
+# تنظیم مجوز دایرکتوری
+chmod 755 /path/to/proxy/
 ```
 
-## 🔧 Configuration
+### 3. تست اولیه
 
-### Server Settings
+```bash
+# تست اتصال
+curl -I https://filmkhabar.space/proxy.php
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `proxy_domain` | `filmkhabar.space` | Your Iranian server domain |
-| `proxy_ip` | `185.235.196.22` | Your Iranian server IP |
-| `use_ip` | `false` | Use IP instead of domain |
-| `max_file_size` | `10G` | Maximum file size to proxy |
-| `memory_limit` | `512M` | PHP memory limit |
-| `timeout` | `300` | cURL timeout in seconds |
-| `buffer_size` | `1048576` | Buffer size for streaming |
-
-### Security Settings
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `allowed_hosts` | `['sv1.cinetory.space']` | Whitelisted domains |
-| `allowed_extensions` | `['mp4', 'avi', 'mkv']` | Allowed file extensions |
-| `enable_logging` | `true` | Enable access logging |
-| `rate_limit` | `100` | Requests per minute |
-
-## 🎯 WordPress Plugin
-
-### Installation
-
-1. Copy `wordpress-plugin/` to `wp-content/plugins/auto-proxy-links/`
-2. Activate the plugin in WordPress admin
-3. Go to "Settings > Auto Proxy Links"
-4. Configure your proxy settings
-
-### Features
-
-- **Automatic Conversion**: Converts direct links automatically
-- **Shortcode Support**: `[proxy_link url="..." text="..."]`
-- **Admin Interface**: Persian UI with tabs
-- **Connection Testing**: Built-in proxy testing
-- **Debug Mode**: Development assistance
-
-### Shortcode Usage
-
-```php
-// Basic usage
-[proxy_link url="https://sv1.cinetory.space/file.mp4" text="دانلود"]
-
-// With custom class
-[proxy_link url="..." text="..." class="custom-button"]
+# تست فایل نمونه
+curl -I https://filmkhabar.space/proxy.php/test.mp4
 ```
 
-## 📖 Usage Examples
+## ⚙️ تنظیمات
 
-### Basic Proxy Request
-
-```php
-// Direct proxy access
-$url = 'https://filmkhabar.space/proxy.php?url=' . urlencode('https://sv1.cinetory.space/file.mp4');
-```
-
-### WordPress Integration
+### فایل `config.php`
 
 ```php
-// In your theme or plugin
-$proxy_url = AutoProxyLinks::convertUrl($original_url);
+// تنظیمات دامنه
+define('SOURCE_DOMAIN', 'sv1.neurobuild.space');
+define('PROXY_DOMAIN', 'filmkhabar.space');
+define('PROXY_IP', '185.235.196.22');
 
-// Test connection
-AutoProxyLinks::testConnection(function($success, $message) {
-    if ($success) {
-        echo "Connection successful: " . $message;
-    } else {
-        echo "Connection failed: " . $message;
-    }
-});
+// تنظیمات فایل‌های بزرگ
+define('MAX_FILE_SIZE', 10 * 1024 * 1024 * 1024); // 10GB
+define('CHUNK_SIZE', 1024 * 1024); // 1MB
+define('BUFFER_SIZE', 8192); // 8KB
+
+// تنظیمات timeout
+define('REQUEST_TIMEOUT', 300); // 5 دقیقه
+define('STREAM_TIMEOUT', 600); // 10 دقیقه
 ```
 
-### Custom Implementation
+### فایل `php_settings.ini`
 
-```php
-// Using link_rewriter.php
-require_once 'link_rewriter.php';
+```ini
+; تنظیمات PHP برای فایل‌های بزرگ
+memory_limit = 2G
+max_execution_time = 0
+max_input_time = 0
+post_max_size = 10G
+upload_max_filesize = 10G
+max_file_uploads = 100
 
-$content = 'Download from https://sv1.cinetory.space/file.mp4';
-$converted_content = convertLinksInContent($content);
+; تنظیمات بافر
+output_buffering = 4096
+implicit_flush = On
 ```
 
-## 🔌 API Reference
-
-### Core Functions
-
-#### `proxyFile($url, $config)`
-Proxies a file from the given URL.
-
-**Parameters:**
-- `$url` (string): The URL to proxy
-- `$config` (array): Configuration array
-
-**Returns:** void (outputs file directly)
-
-#### `convertToProxyUrl($url, $config)`
-Converts a direct URL to a proxy URL.
-
-**Parameters:**
-- `$url` (string): Original URL
-- `$config` (array): Configuration array
-
-**Returns:** string - Proxy URL
-
-#### `validateUrl($url, $config)`
-Validates if a URL can be proxied.
-
-**Parameters:**
-- `$url` (string): URL to validate
-- `$config` (array): Configuration array
-
-**Returns:** bool - True if valid
-
-### WordPress Plugin API
-
-#### `AutoProxyLinks::convertUrl($url)`
-Converts a URL to proxy format.
-
-#### `AutoProxyLinks::testConnection($callback)`
-Tests proxy connection.
-
-#### `AutoProxyLinks::getSettings()`
-Gets plugin settings.
-
-## 🔒 Security
-
-### Best Practices
-
-1. **Use HTTPS**: Always use HTTPS for your proxy server
-2. **Domain Whitelisting**: Only allow trusted domains
-3. **File Extension Filtering**: Restrict file types
-4. **Rate Limiting**: Prevent abuse
-5. **Input Validation**: Sanitize all inputs
-6. **Error Handling**: Don't expose sensitive information
-
-### Security Features
-
-- Domain whitelisting
-- File extension filtering
-- Input validation and sanitization
-- Rate limiting capabilities
-- Secure error handling
-- SSL/TLS support
-
-### Configuration Security
+### فایل `.htaccess`
 
 ```apache
-# .htaccess security settings
-<Files "config.php">
-    Order Allow,Deny
-    Deny from all
-</Files>
+# تنظیمات Apache
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^proxy\.php/(.*)$ proxy.php?path=$1 [L,QSA]
+</IfModule>
 
-# Rate limiting
-<IfModule mod_ratelimit.c>
-    SetOutputFilter RATE_LIMIT
-    SetEnv rate-limit 400
+# تنظیمات CORS
+<IfModule mod_headers.c>
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Range, If-Range"
 </IfModule>
 ```
 
-## 🛠️ Troubleshooting
+## 🎯 استفاده
 
-### Common Issues
+### روش 1: URL مستقیم
 
-#### 1. "File not found" Error
-**Cause**: File doesn't exist or server is down
-**Solution**: Check the original URL and server status
+```
+لینک اصلی:
+https://sv1.neurobuild.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4
 
-#### 2. "Memory limit exceeded" Error
-**Cause**: File is too large for current memory limit
-**Solution**: Increase `memory_limit` in config.php
+لینک پروکسی:
+https://filmkhabar.space/proxy.php/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4
+```
 
-#### 3. "Connection timeout" Error
-**Cause**: Slow connection or server issues
-**Solution**: Increase `timeout` value in config.php
+### روش 2: پارامتر URL
 
-#### 4. WordPress Plugin Not Working
-**Cause**: Plugin not properly configured
-**Solution**: Check settings in WordPress admin
+```
+https://filmkhabar.space/proxy.php?url=https://sv1.neurobuild.space/path/to/video.mp4
+```
 
-### Debug Mode
-
-Enable debug mode in configuration:
+### روش 3: بازنویسی خودکار
 
 ```php
-$config['debug_mode'] = true;
-$config['log_file'] = 'debug.log';
+// استفاده از link_rewriter.php
+$content = "لینک: https://sv1.neurobuild.space/video.mp4";
+$rewritten = rewriteContent($content);
+// نتیجه: لینک: https://filmkhabar.space/proxy.php/video.mp4
 ```
 
-### Log Analysis
+## 🔌 WordPress Plugin
+
+### نصب پلاگین
+
+1. آپلود پوشه `wordpress-plugin` به `/wp-content/plugins/`
+2. فعال‌سازی پلاگین از پنل مدیریت
+3. تنظیمات در `تنظیمات > پروکسی لینک`
+
+### ویژگی‌های پلاگین
+
+- **تبدیل خودکار**: لینک‌ها در پست‌ها، صفحات و ویجت‌ها
+- **شورت‌کد**: `[proxy_link url="..." text="دانلود"]`
+- **تنظیمات پیشرفته**: کنترل کامل روی تبدیل
+- **لاگ فعالیت**: ثبت تمام تبدیل‌ها
+- **تست اتصال**: بررسی وضعیت سرور
+
+### مثال شورت‌کد
+
+```php
+[proxy_link url="https://sv1.neurobuild.space/movie.mp4" text="دانلود فیلم" class="download-btn"]
+```
+
+## 🛡️ امنیت
+
+### محدودیت‌های امنیتی
+
+```php
+// دامنه‌های مجاز
+define('ALLOWED_HOSTS', ['sv1.neurobuild.space', 'filmkhabar.space', '185.235.196.22']);
+
+// پسوندهای مسدود
+define('BLOCKED_EXTENSIONS', ['php', 'php3', 'php4', 'php5', 'phtml', 'asp', 'aspx', 'jsp', 'exe', 'bat', 'cmd']);
+```
+
+### لاگ‌گیری
+
+```php
+// فعال‌سازی لاگ
+define('LOG_ENABLED', true);
+define('LOG_FILE', 'proxy_log.txt');
+define('LOG_LEVEL', 'INFO'); // DEBUG, INFO, WARNING, ERROR
+```
+
+### نمونه لاگ
+
+```
+[2024-01-15 14:30:25] [INFO] درخواست دریافت شد: /proxy.php/movie.mp4
+[2024-01-15 14:30:26] [INFO] URL منبع: https://sv1.neurobuild.space/movie.mp4
+[2024-01-15 14:30:30] [INFO] فایل با موفقیت ارسال شد: /movie.mp4
+```
+
+## 🔧 عیب‌یابی
+
+### مشکلات رایج
+
+#### 1. خطای 404
+```bash
+# بررسی وجود فایل
+curl -I https://sv1.neurobuild.space/test.mp4
+
+# بررسی تنظیمات .htaccess
+cat .htaccess
+```
+
+#### 2. خطای timeout
+```php
+// افزایش timeout در config.php
+define('REQUEST_TIMEOUT', 600); // 10 دقیقه
+define('STREAM_TIMEOUT', 1200); // 20 دقیقه
+```
+
+#### 3. خطای memory
+```ini
+; افزایش memory در php_settings.ini
+memory_limit = 4G
+```
+
+### تست عملکرد
 
 ```bash
-# Check proxy logs
-tail -f proxy.log
+# تست سرعت
+curl -o /dev/null -s -w "%{speed_download} bytes/sec\n" https://filmkhabar.space/proxy.php/test.mp4
 
-# Check PHP error logs
-tail -f /var/log/php_errors.log
+# تست Resume
+curl -H "Range: bytes=1000-2000" https://filmkhabar.space/proxy.php/test.mp4
 
-# Check web server logs
-tail -f /var/log/apache2/access.log
+# تست فایل بزرگ
+curl -I https://filmkhabar.space/proxy.php/large-file.mp4
 ```
 
-## 🤝 Contributing
+### لاگ‌های مفید
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+```bash
+# مشاهده لاگ‌های اخیر
+tail -f proxy_log.txt
 
-### Development Setup
+# جستجو در لاگ‌ها
+grep "ERROR" proxy_log.txt
+grep "WARNING" proxy_log.txt
+```
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+## 📊 مانیتورینگ
 
-### Code Style
+### آمار استفاده
 
-- Follow PSR-12 coding standards
-- Use meaningful variable names
-- Add comments for complex logic
-- Keep functions small and focused
+```php
+// اضافه کردن به proxy.php
+function logStats($filePath, $fileSize, $duration) {
+    $stats = [
+        'timestamp' => time(),
+        'file' => $filePath,
+        'size' => $fileSize,
+        'duration' => $duration,
+        'ip' => $_SERVER['REMOTE_ADDR']
+    ];
+    
+    file_put_contents('proxy_stats.json', json_encode($stats) . "\n", FILE_APPEND);
+}
+```
 
-## 📞 Support
+### گزارش‌گیری
 
-### Contact Information
+  ```bash
+# آمار روزانه
+grep "$(date +%Y-%m-%d)" proxy_log.txt | wc -l
 
-- **Email**: support@filmkhabar.space
-- **Website**: https://filmkhabar.space
-- **GitHub Issues**: [Create an issue](https://github.com/ayroop/Auto-Link-Proxy/issues)
+# فایل‌های محبوب
+grep "فایل با موفقیت ارسال شد" proxy_log.txt | cut -d' ' -f8 | sort | uniq -c | sort -nr
+```
 
-### Documentation
+## 🚀 بهینه‌سازی
 
-- [Setup Guide](SETUP_GUIDE.md) - Detailed installation instructions
-- [Quick Config](QUICK_CONFIG.md) - Quick configuration reference
-- [WordPress Plugin Guide](wordpress-plugin/install-guide.md) - Plugin installation
-- [API Documentation](API.md) - Complete API reference
+### تنظیمات سرور
 
-### Community
+```apache
+# Apache - mod_expires
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType video/* "access plus 1 month"
+</IfModule>
 
-- [GitHub Discussions](https://github.com/ayroop/Auto-Link-Proxy/discussions)
-- [Issues](https://github.com/ayroop/Auto-Link-Proxy/issues)
-- [Releases](https://github.com/ayroop/Auto-Link-Proxy/releases)
+# Apache - mod_deflate
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml
+</IfModule>
+```
 
-## 📄 License
+### تنظیمات PHP
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+```ini
+; بهینه‌سازی برای فایل‌های بزرگ
+realpath_cache_size = 4096K
+realpath_cache_ttl = 600
+opcache.enable = 1
+opcache.memory_consumption = 128
+```
 
-## 🙏 Acknowledgments
+## 📞 پشتیبانی
 
-- Thanks to all contributors
-- Inspired by the need for accessible content in Iran
-- Built with security and performance in mind
+### اطلاعات تماس
 
-## 📊 Project Status
+- **وب‌سایت**: https://filmkhabar.space
+- **ایمیل**: support@filmkhabar.space
+- **تلگرام**: @filmkhabar_support
 
-- **Version**: 1.0.0
-- **Status**: Production Ready
-- **PHP Support**: 7.4+
-- **WordPress Support**: 5.0+
-- **Last Updated**: January 2024
+### گزارش مشکلات
+
+لطفاً هنگام گزارش مشکل، اطلاعات زیر را ارسال کنید:
+
+1. نسخه PHP
+2. نسخه Apache/Nginx
+3. محتوای فایل لاگ
+4. خطای دقیق
+5. مراحل تکرار مشکل
+
+### مشارکت
+
+برای مشارکت در توسعه:
+
+1. Fork کردن repository
+2. ایجاد branch جدید
+3. اعمال تغییرات
+4. ارسال Pull Request
+
+## 📄 لایسنس
+
+این پروژه تحت لایسنس MIT منتشر شده است. برای جزئیات بیشتر فایل `LICENSE` را مطالعه کنید.
+
+## 🔄 تغییرات
+
+### نسخه 1.0.0
+- ✅ راه‌اندازی اولیه سیستم پروکسی
+- ✅ پشتیبانی از فایل‌های بزرگ (تا 10GB)
+- ✅ WordPress Plugin کامل
+- ✅ سیستم لاگ‌گیری
+- ✅ امنیت بالا
+- ✅ بهینه‌سازی عملکرد
 
 ---
 
-**Made with ❤️ for the Iranian community**
-
-[![GitHub stars](https://img.shields.io/github/stars/ayroop/Auto-Link-Proxy.svg?style=social&label=Star)](https://github.com/ayroop/Auto-Link-Proxy)
-[![GitHub forks](https://img.shields.io/github/forks/ayroop/Auto-Link-Proxy.svg?style=social&label=Fork)](https://github.com/ayroop/Auto-Link-Proxy/fork)
-[![GitHub watchers](https://img.shields.io/github/watchers/ayroop/Auto-Link-Proxy.svg?style=social&label=Watch)](https://github.com/ayroop/Auto-Link-Proxy)
+**🎬 با filmkhabar.space، دانلود بدون محدودیت!**

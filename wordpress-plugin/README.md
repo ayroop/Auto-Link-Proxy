@@ -22,7 +22,7 @@
 
 ### 2. تنظیمات اولیه
 در بخش تنظیمات عمومی:
-- **دامنه پروکسی**: `filmkhabar.space`
+- **دامنه پروکسی**: `sv5.filmkhabar.space`
 - **IP اختصاصی**: `185.235.196.22`
 - **استفاده از IP**: اختیاری (برای استفاده از IP به جای دامنه)
 
@@ -41,7 +41,7 @@ https://sv1.cinetory.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFi
 
 **لینک پروکسی:**
 ```
-https://filmkhabar.space/proxy.php?url=https%3A//sv1.cinetory.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4
+https://sv5.filmkhabar.space/proxy.php?url=https%3A//sv1.cinetory.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4
 ```
 
 ### شورت‌کد دستی
@@ -157,8 +157,8 @@ add_action('auto_proxy_links_after_convert', function($original_url, $proxy_url)
 3. **عملکرد کند**: حالت دیباگ را غیرفعال کنید
 
 ### تماس با پشتیبانی
-- ایمیل: support@filmkhabar.space
-- وب‌سایت: https://filmkhabar.space
+- ایمیل: support@sv5.filmkhabar.space
+- وب‌سایت: https://sv5.filmkhabar.space
 
 ## تغییرات نسخه
 

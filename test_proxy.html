@@ -3,159 +3,495 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تست پروکسی - Proxy Test</title>
+    <title>تست پروکسی ویدیو - filmkhabar.space</title>
+    
+    <!-- Google Fonts - Vazirmatn -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <style>
+        * {
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif !important;
+        }
+        
         body {
-            font-family: 'Tahoma', 'Arial', sans-serif;
-            max-width: 800px;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-weight: 400;
         }
+        
         .container {
             background: white;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
+        
         h1 {
             color: #2c3e50;
             text-align: center;
             margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 700;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
         }
+        
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 30px;
+            font-weight: 600;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+        }
+        
         .test-link {
             display: block;
             margin: 15px 0;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        .test-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .info {
+            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-right: 5px solid #3498db;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-right: 5px solid #ffc107;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        .error {
+            background: linear-gradient(135deg, #f8d7da 0%, #fab1a0 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-right: 5px solid #e74c3c;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        .success {
+            background: linear-gradient(135deg, #d4edda 0%, #55a3ff 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-right: 5px solid #28a745;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-family: 'Courier New', 'Vazirmatn', monospace;
+            font-size: 0.9em;
+        }
+        
+        .domain-info {
+            background: linear-gradient(135deg, #d4edda 0%, #55a3ff 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-right: 5px solid #28a745;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        .file-list {
+            background: #f8f9fa;
             padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        .file-list ul {
+            margin: 10px 0;
+            padding-right: 20px;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        .file-list li {
+            margin: 8px 0;
+            padding: 5px 0;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+        
+        .status-required { background: #e74c3c; }
+        .status-optional { background: #f39c12; }
+        .status-recommended { background: #27ae60; }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fafafa;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
             background: #3498db;
             color: white;
             text-decoration: none;
             border-radius: 5px;
-            text-align: center;
+            margin: 5px;
             transition: background 0.3s;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
+            font-weight: 500;
         }
-        .test-link:hover {
+        
+        .btn:hover {
             background: #2980b9;
         }
-        .info {
-            background: #ecf0f1;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-            border-right: 4px solid #3498db;
+        
+        .btn-danger {
+            background: #e74c3c;
         }
-        .warning {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-            border-right: 4px solid #ffc107;
+        
+        .btn-danger:hover {
+            background: #c0392b;
         }
-        code {
-            background: #f8f9fa;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
+        
+        .btn-success {
+            background: #27ae60;
         }
-        .domain-info {
-            background: #d4edda;
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .log-viewer {
+            background: #2c3e50;
+            color: #ecf0f1;
             padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-            border-right: 4px solid #28a745;
+            border-radius: 8px;
+            font-family: 'Courier New', 'Vazirmatn', monospace;
+            font-size: 0.9em;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        
+        p, div, span, a, button, input, textarea, select {
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif !important;
+        }
+        
+        ul, ol, li {
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif !important;
+        }
+        
+        strong, b {
+            font-weight: 600;
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif !important;
+        }
+        
+        em, i {
+            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif !important;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🧪 تست عملکرد پروکسی</h1>
+        <h1>🎬 تست پروکسی ویدیو</h1>
         
         <div class="domain-info">
-            <strong>🌐 اطلاعات سرور:</strong><br>
-            <strong>دامنه:</strong> filmkhabar.space<br>
+            <strong>🌐 اطلاعات سرور ایران:</strong><br>
+            <strong>دامنه:</strong> sv1.neurobuild.space<br>
             <strong>IP اختصاصی:</strong> 185.235.196.22<br>
-            <strong>پینگ:</strong> ~178ms (متوسط)
+            <strong>پینگ:</strong> ~178ms (متوسط)<br>
+            <strong>وضعیت:</strong> <span class="status-indicator status-recommended"></span> فعال
         </div>
-        
+
         <div class="info">
-            <strong>📋 راهنما:</strong> این صفحه برای تست عملکرد پروکسی طراحی شده است. 
-            روی لینک‌های زیر کلیک کنید تا ببینید آیا فایل‌ها از طریق پروکسی دانلود می‌شوند یا خیر.
+            <strong>📋 راهنما:</strong> این صفحه برای تست کامل عملکرد پروکسی طراحی شده است. 
+            قبل از شروع تست، مطمئن شوید که تمام فایل‌های مورد نیاز در سرور ایران آپلود شده‌اند.
+        </div>
+
+        <h2>📁 فایل‌های مورد نیاز در سرور ایران</h2>
+        
+        <div class="file-list">
+            <strong>فایل‌های اجباری:</strong>
+            <ul>
+                <li><span class="status-indicator status-required"></span> <code>proxy.php</code> - اسکریپت اصلی پروکسی</li>
+                <li><span class="status-indicator status-required"></span> <code>config.php</code> - فایل تنظیمات</li>
+                <li><span class="status-indicator status-required"></span> <code>.htaccess</code> - تنظیمات Apache</li>
+            </ul>
+            
+            <strong>فایل‌های اختیاری:</strong>
+            <ul>
+                <li><span class="status-indicator status-optional"></span> <code>php_settings.ini</code> - تنظیمات PHP</li>
+                <li><span class="status-indicator status-optional"></span> <code>proxy.log</code> - فایل لاگ (خودکار ایجاد می‌شود)</li>
+            </ul>
+            
+            <strong>فایل‌های توصیه شده:</strong>
+            <ul>
+                <li><span class="status-indicator status-recommended"></span> <code>test_proxy.html</code> - این فایل تست</li>
+                <li><span class="status-indicator status-recommended"></span> <code>link_rewriter.php</code> - تبدیل لینک‌ ها</li>
+            </ul>
         </div>
 
         <div class="warning">
-            <strong>⚠️ توجه:</strong> قبل از تست، مطمئن شوید که:
+            <strong>⚠️ بررسی پیش‌نیازها:</strong>
             <ul>
-                <li>فایل <code>proxy.php</code> در ریشه سایت ایران آپلود شده است</li>
-                <li>تنظیمات <code>ALLOWED_HOST</code> در <code>config.php</code> درست است</li>
-                <li>هاست ایران از PHP و cURL پشتیبانی می‌کند</li>
+                <li>✅ فایل <code>proxy.php</code> در ریشه سایت ایران آپلود شده است</li>
+                <li>✅ تنظیمات <code>ALLOWED_HOST</code> در <code>config.php</code> درست است</li>
+                <li>✅ هاست ایران از PHP 7.4+ و cURL پشتیبانی می‌کند</li>
+                <li>✅ SSL/HTTPS فعال است (توصیه می‌شود)</li>
+                <li>✅ مجوزهای فایل (644) و پوشه (755) درست تنظیم شده‌اند</li>
             </ul>
         </div>
 
         <h2>🎬 تست دانلود فیلم</h2>
-        <a href="https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4" 
-           class="test-link" target="_blank">
-            دانلود فیلم Seberg (480p) - via Domain
-        </a>
+        <div class="test-section">
+            <a href="http://sv1.neurobuild.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4" 
+               class="test-link" target="_blank">
+                🎥 دانلود فیلم Seberg (480p) - via Domain
+            </a>
 
-        <a href="https://185.235.196.22/proxy.php?url=https://sv1.cinetory.space/h2/movie/sv1/tt1780967/Seberg.2019.720p.HardSub.SerFil.mp4" 
-           class="test-link" target="_blank">
-            دانلود فیلم Seberg (720p) - via IP
-        </a>
+            <a href="http://185.235.196.22/proxy.php?url=http://sv1.neurobuild.space/h2/movie/sv1/tt1780967/Seberg.2019.720p.HardSub.SerFil.mp4" 
+               class="test-link" target="_blank">
+                🎥 دانلود فیلم Seberg (720p) - via IP
+            </a>
+
+            <a href="http://sv1.neurobuild.space/h2/movie/sv1/tt0111161/The.Shawshank.Redemption.1994.720p.HardSub.SerFil.mp4" 
+               class="test-link" target="_blank">
+                🎥 دانلود فیلم The Shawshank Redemption (720p)
+            </a>
+        </div>
 
         <h2>📺 تست دانلود سریال</h2>
-        <a href="https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/h2/series/sv4/tt13819960/s03/2-Web-DL.720p/And.Just.Like.That.S03E01.720p.WEB.DL.HardSub.SerFil.mp4" 
-           class="test-link" target="_blank">
-            دانلود سریال And Just Like That - قسمت 1
-        </a>
+        <div class="test-section">
+            <a href="http://sv1.neurobuild.space/h2/series/sv4/tt13819960/s03/2-Web-DL.720p/And.Just.Like.That.S03E01.720p.WEB.DL.HardSub.SerFil.mp4" 
+               class="test-link" target="_blank">
+                📺 دانلود سریال And Just Like That - قسمت 1
+            </a>
 
-        <a href="https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/h2/series/sv4/tt13819960/s03/2-Web-DL.720p/And.Just.Like.That.S03E02.720p.WEB.DL.HardSub.SerFil.mp4" 
-           class="test-link" target="_blank">
-            دانلود سریال And Just Like That - قسمت 2
-        </a>
+            <a href="http://sv1.neurobuild.space/h2/series/sv4/tt13819960/s03/2-Web-DL.720p/And.Just.Like.That.S03E02.720p.WEB.DL.HardSub.SerFil.mp4" 
+               class="test-link" target="_blank">
+                📺 دانلود سریال And Just Like That - قسمت 2
+            </a>
+        </div>
 
-        <h2>🔧 تست خطا</h2>
-        <a href="https://filmkhabar.space/proxy.php?url=https://example.com/test.mp4" 
-           class="test-link" target="_blank" style="background: #e74c3c;">
-            تست خطا - دامنه غیرمجاز
-        </a>
+        <h2>🔧 تست خطا و امنیت</h2>
+        <div class="test-section">
+            <a href="http://sv1.neurobuild.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4" 
+               class="test-link" target="_blank" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+                ❌ تست خطا - دامنه غیرمجاز
+            </a>
 
-        <a href="https://filmkhabar.space/proxy.php" 
-           class="test-link" target="_blank" style="background: #e74c3c;">
-            تست خطا - بدون پارامتر URL
-        </a>
+            <a href="http://sv1.neurobuild.space/proxy.php" 
+               class="test-link" target="_blank" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+                ❌ تست خطا - بدون پارامتر URL
+            </a>
 
-        <div class="info">
-            <strong>✅ در صورت موفقیت:</strong> فایل شروع به دانلود می‌شود یا در مرورگر پخش می‌شود.<br>
-            <strong>❌ در صورت خطا:</strong> پیام خطای فارسی نمایش داده می‌شود.
+            <a href="http://sv1.neurobuild.space/h2/movie/sv1/tt0111161/The.Shawshank.Redemption.1994.720p.HardSub.SerFil.mp4" 
+               class="test-link" target="_blank" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                ⚠️ تست خطا - پسوند غیرمجاز (.txt)
+            </a>
+        </div>
+
+        <h2>📊 تست عملکرد</h2>
+        <div class="test-section">
+            <button onclick="testConnection()" class="btn btn-success">🔍 تست اتصال پروکسی</button>
+            <button onclick="checkFileSize()" class="btn">📏 تست اندازه فایل</button>
+            <button onclick="testRangeRequest()" class="btn">⏯️ تست Resume Download</button>
+            
+            <div id="test-results" class="log-viewer" style="display: none;">
+                <div id="test-output"></div>
+            </div>
+        </div>
+
+        <div class="success">
+            <strong>✅ در صورت موفقیت:</strong> 
+            <ul>
+                <li>فایل شروع به دانلود می‌شود یا در مرورگر پخش می‌شود</li>
+                <li>سرعت دانلود مناسب است</li>
+                <li>فایل کامل دانلود می‌شود</li>
+                <li>امکان Resume Download وجود دارد</li>
+            </ul>
+        </div>
+
+        <div class="error">
+            <strong>❌ در صورت خطا:</strong> 
+            <ul>
+                <li>پیام خطای فارسی نمایش داده می‌شود</li>
+                <li>کد خطا در URL نمایش داده می‌شود</li>
+                <li>لاگ خطا در فایل <code>proxy.log</code> ثبت می‌شود</li>
+            </ul>
         </div>
 
         <h2>📊 بررسی لاگ‌ها</h2>
-        <p>برای بررسی لاگ‌های سیستم، فایل <code>proxy.log</code> را در ریشه سایت بررسی کنید:</p>
-        <code>tail -f /path/to/your/site/proxy.log</code>
+        <div class="info">
+            <p>برای بررسی لاگ‌های سیستم، فایل <code>proxy.log</code> را در ریشه سایت بررسی کنید:</p>
+            <code>tail -f /path/to/your/site/proxy.log</code>
+            
+            <p>یا از طریق cPanel File Manager فایل لاگ را بررسی کنید.</p>
+        </div>
 
         <h2>🔗 لینک مستقیم (بدون پروکسی)</h2>
-        <p>برای مقایسه، این لینک‌ها مستقیماً به سرور خارجی اشاره می‌کنند:</p>
-        <a href="https://sv1.cinetory.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4" 
-           class="test-link" target="_blank" style="background: #95a5a6;">
-            لینک مستقیم (احتمالاً مسدود)
-        </a>
+        <div class="test-section">
+            <p>برای مقایسه، این لینک‌ها مستقیماً به سرور خارجی اشاره می‌کنند:</p>
+            <a href="http://sv1.neurobuild.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4" 
+               class="test-link" target="_blank" style="background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);">
+                🔗 لینک مستقیم (احتمالاً مسدود)
+            </a>
+        </div>
 
         <h2>⚙️ تنظیمات پیشنهادی</h2>
         <div class="info">
             <strong>برای استفاده از IP به جای دامنه:</strong><br>
             در فایل <code>config.php</code> خط زیر را تغییر دهید:<br>
             <code>const USE_IP_INSTEAD_OF_DOMAIN = true;</code>
+            
+            <br><br>
+            <strong>برای فعال کردن لاگ:</strong><br>
+            در فایل <code>config.php</code> خط زیر را تغییر دهید:<br>
+            <code>const ENABLE_LOGGING = true;</code>
+        </div>
+
+        <h2>🚀 نصب WordPress Plugin</h2>
+        <div class="info">
+            <p>برای استفاده از پلاگین وردپرس:</p>
+            <ol>
+                <li>پوشه <code>wordpress-plugin/</code> را در <code>wp-content/plugins/</code> کپی کنید</li>
+                <li>پلاگین را از پنل مدیریت فعال کنید</li>
+                <li>تنظیمات را در "تنظیمات > Auto Proxy Links" انجام دهید</li>
+                <li>لینک‌ها به طور خودکار تبدیل می‌شوند</li>
+            </ol>
         </div>
     </div>
 
     <script>
+        // تست اتصال پروکسی
+        function testConnection() {
+            const resultsDiv = document.getElementById('test-results');
+            const outputDiv = document.getElementById('test-output');
+            
+            resultsDiv.style.display = 'block';
+            outputDiv.innerHTML = '🔍 در حال تست اتصال...\n';
+            
+            const testUrl = 'http://sv1.neurobuild.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4';
+            
+            fetch(testUrl, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        outputDiv.innerHTML += `✅ اتصال موفق! کد: ${response.status}\n`;
+                        outputDiv.innerHTML += `📊 Content-Length: ${response.headers.get('content-length') || 'نامشخص'}\n`;
+                        outputDiv.innerHTML += `📅 Last-Modified: ${response.headers.get('last-modified') || 'نامشخص'}\n`;
+                    } else {
+                        outputDiv.innerHTML += `❌ خطا! کد: ${response.status}\n`;
+                    }
+                })
+                .catch(error => {
+                    outputDiv.innerHTML += `❌ خطای اتصال: ${error.message}\n`;
+                });
+        }
+
+        // تست اندازه فایل
+        function checkFileSize() {
+            const resultsDiv = document.getElementById('test-results');
+            const outputDiv = document.getElementById('test-output');
+            
+            resultsDiv.style.display = 'block';
+            outputDiv.innerHTML = '📏 در حال بررسی اندازه فایل...\n';
+            
+            const testUrl = 'http://sv1.neurobuild.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4';
+            
+            fetch(testUrl, { method: 'HEAD' })
+                .then(response => {
+                    const contentLength = response.headers.get('content-length');
+                    if (contentLength) {
+                        const sizeInMB = (contentLength / (1024 * 1024)).toFixed(2);
+                        outputDiv.innerHTML += `📊 اندازه فایل: ${sizeInMB} MB\n`;
+                        
+                        if (contentLength > 1073741824) { // 1GB
+                            outputDiv.innerHTML += `⚠️ فایل بزرگ است (${sizeInMB} MB) - ممکن است زمان دانلود طول بکشد\n`;
+                        }
+                    } else {
+                        outputDiv.innerHTML += `❌ اندازه فایل قابل تشخیص نیست\n`;
+                    }
+                })
+                .catch(error => {
+                    outputDiv.innerHTML += `❌ خطا: ${error.message}\n`;
+                });
+        }
+
+        // تست Range Request
+        function testRangeRequest() {
+            const resultsDiv = document.getElementById('test-results');
+            const outputDiv = document.getElementById('test-output');
+            
+            resultsDiv.style.display = 'block';
+            outputDiv.innerHTML = '⏯️ در حال تست Resume Download...\n';
+            
+            const testUrl = 'http://sv1.neurobuild.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4';
+            
+            fetch(testUrl, { 
+                method: 'GET',
+                headers: { 'Range': 'bytes=0-1023' }
+            })
+                .then(response => {
+                    if (response.status === 206) {
+                        outputDiv.innerHTML += `✅ Resume Download پشتیبانی می‌شود!\n`;
+                        outputDiv.innerHTML += `📊 Content-Range: ${response.headers.get('content-range') || 'نامشخص'}\n`;
+                    } else if (response.status === 200) {
+                        outputDiv.innerHTML += `⚠️ Resume Download پشتیبانی نمی‌شود (کد 200)\n`;
+                    } else {
+                        outputDiv.innerHTML += `❌ خطا! کد: ${response.status}\n`;
+                    }
+                })
+                .catch(error => {
+                    outputDiv.innerHTML += `❌ خطا: ${error.message}\n`;
+                });
+        }
+
         // اضافه کردن اطلاعات اضافی
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🔧 تست پروکسی بارگذاری شد');
             console.log('📅 تاریخ تست:', new Date().toLocaleString('fa-IR'));
-            console.log('🌐 دامنه سرور:', 'filmkhabar.space');
+            console.log('🌐 دامنه سرور:', 'sv1.neurobuild.space');
             console.log('🔢 IP سرور:', '185.235.196.22');
+            console.log('📱 User Agent:', navigator.userAgent);
+            console.log('🎨 فونت Vazirmatn بارگذاری شد');
         });
     </script>
 </body>
-</html> 
+</html>

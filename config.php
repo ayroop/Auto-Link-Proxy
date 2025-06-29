@@ -1,10 +1,46 @@
 <?php
 /**
- * config.php
- *
- * فایل تنظیمات مرکزی برای سیستم پروکسی
- * تمام تنظیمات مهم در این فایل قرار دارد
+ * تنظیمات مرکزی پروکسی
+ * Central Proxy Configuration
  */
+
+// تنظیمات دامنه و پروکسی
+// Domain and proxy settings
+define('SOURCE_DOMAIN', 'sv1.neurobuild.space'); // دامنه منبع اصلی
+define('PROXY_DOMAIN', 'filmkhabar.space'); // دامنه پروکسی ایرانی
+define('PROXY_IP', '185.235.196.22'); // IP اختصاصی سرور ایرانی
+
+// تنظیمات مسیر
+// Path settings
+define('PROXY_SCRIPT_PATH', '/proxy.php'); // مسیر اسکریپت پروکسی
+
+// تنظیمات فایل‌های بزرگ
+// Large file settings
+define('MAX_FILE_SIZE', 10 * 1024 * 1024 * 1024); // 10GB
+define('CHUNK_SIZE', 1024 * 1024); // 1MB chunks
+define('BUFFER_SIZE', 8192); // 8KB buffer
+
+// تنظیمات timeout
+// Timeout settings
+define('REQUEST_TIMEOUT', 300); // 5 minutes
+define('STREAM_TIMEOUT', 600); // 10 minutes
+
+// تنظیمات لاگ
+// Logging settings
+define('LOG_ENABLED', true);
+define('LOG_FILE', 'proxy_log.txt');
+define('LOG_LEVEL', 'INFO'); // DEBUG, INFO, WARNING, ERROR
+
+// تنظیمات امنیت
+// Security settings
+define('ALLOWED_HOSTS', ['sv1.neurobuild.space', 'filmkhabar.space', '185.235.196.22']);
+define('BLOCKED_EXTENSIONS', ['php', 'php3', 'php4', 'php5', 'phtml', 'asp', 'aspx', 'jsp', 'exe', 'bat', 'cmd']);
+
+// تنظیمات WordPress
+// WordPress settings
+define('WP_PLUGIN_NAME', 'Auto Proxy Links');
+define('WP_PLUGIN_VERSION', '1.0.0');
+define('WP_OPTION_NAME', 'auto_proxy_links_settings');
 
 // =======================
 // === تنظیمات اصلی ===
@@ -19,19 +55,16 @@ const ALLOWED_HOSTS = [
 ];
 
 // آدرس پروکسی (دامنه ایران)
-const PROXY_DOMAIN = 'filmkhabar.space'; // دامنه واقعی شما
+const PROXY_DOMAIN = 'sv5.filmkhabar.space';
 const PROXY_IP = '185.235.196.22'; // IP اختصاصی شما
 const PROXY_SCRIPT = 'proxy.php';
 
 // انتخاب آدرس پروکسی (دامنه یا IP)
-const USE_IP_INSTEAD_OF_DOMAIN = false; // true برای استفاده از IP، false برای دامنه
+const USE_IP_INSTEAD_OF_DOMAIN = true; // true برای استفاده از IP، false برای دامنه
 
 // =======================
 // === تنظیمات لاگ‌گیری ===
 // =======================
-
-// فعال/غیرفعال کردن لاگ‌گیری
-const LOG_ENABLED = true;
 
 // مسیر فایل لاگ
 const LOG_FILE = __DIR__ . '/proxy.log';
@@ -136,7 +169,7 @@ function isAllowedIP(string $ip): bool {
  */
 function getProxyUrl(string $originalUrl): string {
     $proxyAddress = USE_IP_INSTEAD_OF_DOMAIN ? PROXY_IP : PROXY_DOMAIN;
-    return 'https://' . $proxyAddress . '/' . PROXY_SCRIPT . '?url=' . urlencode($originalUrl);
+    return 'http://' . $proxyAddress . '/' . PROXY_SCRIPT . '?url=' . urlencode($originalUrl);
 }
 
 /**

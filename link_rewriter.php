@@ -2,7 +2,7 @@
 /**
  * link_rewriter.php
  *
- * اسکریپت بازنویسی خودکار لینک‌ ها برای تبدیل مستقیم لینک‌ های sv1.cinetory.space
+ * اسکریپت بازنویسی خودکار لینک‌ ها برای تبدیل مستقیم لینک‌ های sv1.neurobuild.space
  * به لینک‌ های پروکسی از طریق filmkhabar.space
  * 
  * نحوه استفاده: این کد را در ابتدای فایل‌های PHP سایت خود قرار دهید
@@ -83,8 +83,8 @@ require_once 'link_rewriter.php';
 </head>
 <body>
     <!-- این لینک‌ها به صورت خودکار به پروکسی تبدیل می‌شوند -->
-    <a href="https://sv1.cinetory.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4">دانلود فیلم</a>
-    <a href="https://sv1.cinetory.space/h2/series/sv4/tt13819960/s03/And.Just.Like.That.S03E01.720p.WEB.DL.HardSub.SerFil.mp4">دانلود سریال</a>
+    <a href="https://sv1.neurobuild.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4">دانلود فیلم</a>
+    <a href="https://sv1.neurobuild.space/h2/series/sv4/tt13819960/s03/And.Just.Like.That.S03E01.720p.WEB.DL.HardSub.SerFil.mp4">دانلود سریال</a>
 </body>
 </html>
 
@@ -104,7 +104,7 @@ ob_end_flush();
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // پیدا کردن همه لینک‌های دانلود
-    const links = document.querySelectorAll('a[href*="sv1.cinetory.space"]');
+    const links = document.querySelectorAll('a[href*="sv1.neurobuild.space"]');
     
     links.forEach(function(link) {
         const originalHref = link.href;
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isDownloadable) {
             // استفاده از تنظیمات مرکزی
             const proxyAddress = <?php echo USE_IP_INSTEAD_OF_DOMAIN ? '"' . PROXY_IP . '"' : '"' . PROXY_DOMAIN . '"'; ?>;
-            link.href = 'https://' + proxyAddress + '/proxy.php?url=' + encodeURIComponent(originalHref);
+            link.href = 'http://' + proxyAddress + '/proxy.php?url=' + encodeURIComponent(originalHref);
         }
     });
 });
