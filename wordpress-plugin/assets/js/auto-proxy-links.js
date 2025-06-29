@@ -1,138 +1,126 @@
 /**
  * Auto Proxy Links - Frontend JavaScript
- * تبدیل خودکار لینک‌های sv1.neurobuild.space به لینک‌های پروکسی
+ * تبدیل خودکار لینک‌های مستقیم به لینک‌های پروکسی
  */
 
 (function($) {
     'use strict';
-    
-    // تنظیمات از PHP
-    const settings = window.apl_settings || {
+
+    // تنظیمات پیش‌فرض
+    const defaultSettings = {
+        proxy_domain: 'tr.modulogic.space',
         source_domain: 'sv1.neurobuild.space',
-        proxy_domain: 'filmkhabar.space',
-        proxy_ip: '45.12.143.141',
-        proxy_path: '/proxy.php',
-        show_info: true
+        allowed_hosts: ['sv1.neurobuild.space'],
+        allowed_extensions: ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', 'm4v', 'zip', 'rar', '7z'],
+        debug_mode: false
     };
-    
+
+    // دریافت تنظیمات از WordPress
+    const settings = window.apl_settings || defaultSettings;
+
     /**
-     * تبدیل URL مستقیم به URL پروکسی
+     * بررسی اینکه آیا URL از دامنه مجاز است
+     */
+    function isAllowedHost(url) {
+        const urlObj = new URL(url);
+        return settings.allowed_hosts.some(host => urlObj.hostname.includes(host));
+    }
+
+    /**
+     * بررسی اینکه آیا فایل از نوع مجاز است
+     */
+    function isAllowedExtension(url) {
+        const extension = url.split('.').pop().toLowerCase();
+        return settings.allowed_extensions.includes(extension);
+    }
+
+    /**
+     * تبدیل URL به لینک پروکسی
      */
     function convertToProxyUrl(originalUrl) {
-        // بررسی اینکه آیا URL از دامنه منبع است
-        if (!originalUrl.includes(settings.source_domain)) {
+        try {
+            // بررسی اینکه آیا URL از دامنه مجاز است
+            if (!isAllowedHost(originalUrl)) {
+                if (settings.debug_mode) {
+                    console.log('Auto Proxy Links: URL از دامنه مجاز نیست:', originalUrl);
+                }
+                return originalUrl;
+            }
+
+            // بررسی اینکه آیا فایل از نوع مجاز است
+            if (!isAllowedExtension(originalUrl)) {
+                if (settings.debug_mode) {
+                    console.log('Auto Proxy Links: فایل از نوع مجاز نیست:', originalUrl);
+                }
+                return originalUrl;
+            }
+
+            // ساخت URL پروکسی
+            const proxyUrl = `https://${settings.proxy_domain}/proxy.php?url=${encodeURIComponent(originalUrl)}`;
+            
+            if (settings.debug_mode) {
+                console.log('Auto Proxy Links: تبدیل لینک:', originalUrl, '->', proxyUrl);
+            }
+            
+            return proxyUrl;
+        } catch (error) {
+            if (settings.debug_mode) {
+                console.error('Auto Proxy Links: خطا در تبدیل لینک:', error);
+            }
             return originalUrl;
         }
-        
-        // استخراج مسیر فایل
-        const urlObj = new URL(originalUrl);
-        const filePath = urlObj.pathname;
-        
-        if (!filePath) {
-            return originalUrl;
-        }
-        
-        // ساخت URL پروکسی
-        const proxyUrl = `https://${settings.proxy_domain}${settings.proxy_path}${filePath}`;
-        
-        console.log(`🔗 تبدیل لینک: ${originalUrl} -> ${proxyUrl}`);
-        return proxyUrl;
     }
-    
+
     /**
-     * تبدیل همه لینک‌های موجود در صفحه
+     * تبدیل لینک‌های موجود در صفحه
      */
     function convertExistingLinks() {
-        const links = document.querySelectorAll('a[href*="' + settings.source_domain + '"]');
-        
-        links.forEach(function(link) {
-            const originalUrl = link.href;
-            const proxyUrl = convertToProxyUrl(originalUrl);
+        $(`a[href*="${settings.source_domain}"]`).each(function() {
+            const $link = $(this);
+            const originalHref = $link.attr('href');
             
-            if (proxyUrl !== originalUrl) {
-                link.href = proxyUrl;
-                link.setAttribute('data-original-url', originalUrl);
-                link.classList.add('proxy-converted');
+            // بررسی اینکه آیا لینک قبلاً تبدیل شده است
+            if ($link.hasClass('proxy-converted')) {
+                return;
+            }
+            
+            const proxyHref = convertToProxyUrl(originalHref);
+            
+            if (proxyHref !== originalHref) {
+                $link.attr('href', proxyHref);
+                $link.addClass('proxy-converted');
                 
-                // اضافه کردن اطلاعات پروکسی
-                if (settings.show_info) {
-                    addProxyInfo(link);
+                // اضافه کردن نشانگر پروکسی
+                if (!$link.find('.proxy-indicator').length) {
+                    $link.append('<span class="proxy-indicator" style="color: #0073aa; font-size: 0.8em; margin-right: 5px;">🔗</span>');
                 }
             }
         });
-        
-        console.log(`✅ ${links.length} لینک تبدیل شد`);
     }
-    
+
     /**
-     * اضافه کردن اطلاعات پروکسی به لینک
+     * تبدیل لینک‌های جدید که به صورت پویا اضافه می‌شوند
      */
-    function addProxyInfo(link) {
-        // ایجاد tooltip
-        const tooltip = document.createElement('div');
-        tooltip.className = 'proxy-tooltip';
-        tooltip.innerHTML = `
-            <div class="proxy-info">
-                <strong>🔗 لینک پروکسی</strong><br>
-                <small>سرور ایرانی: ${settings.proxy_domain}</small><br>
-                <small>IP: ${settings.proxy_ip}</small>
-            </div>
-        `;
-        tooltip.style.cssText = `
-            position: absolute;
-            background: #2c3e50;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            max-width: 200px;
-        `;
-        
-        document.body.appendChild(tooltip);
-        
-        // نمایش tooltip در hover
-        link.addEventListener('mouseenter', function(e) {
-            tooltip.style.display = 'block';
-            tooltip.style.left = e.pageX + 10 + 'px';
-            tooltip.style.top = e.pageY - 10 + 'px';
-        });
-        
-        link.addEventListener('mouseleave', function() {
-            tooltip.style.display = 'none';
-        });
-    }
-    
-    /**
-     * نظارت بر تغییرات DOM برای لینک‌های جدید
-     */
-    function observeNewLinks() {
+    function convertDynamicLinks() {
+        // نظارت بر تغییرات DOM
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.type === 'childList') {
                     mutation.addedNodes.forEach(function(node) {
                         if (node.nodeType === 1) { // Element node
-                            const newLinks = node.querySelectorAll ? 
-                                node.querySelectorAll('a[href*="' + settings.source_domain + '"]') : [];
-                            
-                            if (node.matches && node.matches('a[href*="' + settings.source_domain + '"]')) {
-                                newLinks.push(node);
-                            }
-                            
-                            newLinks.forEach(function(link) {
-                                if (!link.classList.contains('proxy-converted')) {
-                                    const originalUrl = link.href;
-                                    const proxyUrl = convertToProxyUrl(originalUrl);
+                            $(node).find(`a[href*="${settings.source_domain}"]`).each(function() {
+                                const $link = $(this);
+                                const originalHref = $link.attr('href');
+                                
+                                if (!$link.hasClass('proxy-converted')) {
+                                    const proxyHref = convertToProxyUrl(originalHref);
                                     
-                                    if (proxyUrl !== originalUrl) {
-                                        link.href = proxyUrl;
-                                        link.setAttribute('data-original-url', originalUrl);
-                                        link.classList.add('proxy-converted');
+                                    if (proxyHref !== originalHref) {
+                                        $link.attr('href', proxyHref);
+                                        $link.addClass('proxy-converted');
                                         
-                                        if (settings.show_info) {
-                                            addProxyInfo(link);
+                                        if (!$link.find('.proxy-indicator').length) {
+                                            $link.append('<span class="proxy-indicator" style="color: #0073aa; font-size: 0.8em; margin-right: 5px;">🔗</span>');
                                         }
                                     }
                                 }
@@ -142,110 +130,94 @@
                 }
             });
         });
-        
+
+        // شروع نظارت
         observer.observe(document.body, {
             childList: true,
             subtree: true
         });
     }
-    
+
     /**
-     * اضافه کردن استایل‌های CSS
+     * تبدیل لینک‌های در input و textarea
      */
-    function addStyles() {
-        const style = document.createElement('style');
-        style.textContent = `
-            .proxy-converted {
-                position: relative;
-                transition: all 0.3s ease;
-            }
+    function convertFormLinks() {
+        $('input[type="url"], textarea').on('input', function() {
+            const $field = $(this);
+            const value = $field.val();
             
-            .proxy-converted:hover {
-                background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-                color: white !important;
-                text-decoration: none;
-                padding: 5px 10px;
-                border-radius: 5px;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            if (value && value.includes(settings.source_domain)) {
+                const proxyValue = convertToProxyUrl(value);
+                
+                if (proxyValue !== value) {
+                    $field.val(proxyValue);
+                    
+                    // نمایش پیام
+                    if (!$field.next('.proxy-notice').length) {
+                        $field.after('<div class="proxy-notice" style="color: #0073aa; font-size: 0.8em; margin-top: 5px;">🔗 لینک به پروکسی تبدیل شد</div>');
+                    }
+                }
             }
-            
-            .proxy-tooltip {
-                pointer-events: none;
-            }
-            
-            .proxy-info {
-                line-height: 1.4;
-            }
-            
-            .proxy-info strong {
-                color: #3498db;
-            }
-            
-            .proxy-info small {
-                opacity: 0.8;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-    
-    /**
-     * تست اتصال پروکسی
-     */
-    function testProxyConnection() {
-        const testUrl = `https://${settings.proxy_domain}${settings.proxy_path}`;
-        
-        fetch(testUrl, { 
-            method: 'HEAD',
-            mode: 'no-cors'
-        })
-        .then(function(response) {
-            console.log('✅ اتصال پروکسی موفق');
-            return true;
-        })
-        .catch(function(error) {
-            console.warn('⚠️ خطا در اتصال پروکسی:', error);
-            return false;
         });
     }
-    
+
     /**
-     * راه‌اندازی
+     * اضافه کردن دکمه تبدیل دستی
+     */
+    function addManualConvertButton() {
+        // اضافه کردن دکمه به toolbar
+        if ($('#wp-admin-bar-top-secondary').length) {
+            const $button = $(`
+                <li id="wp-admin-bar-proxy-convert">
+                    <a href="#" style="color: #0073aa;">
+                        <span class="ab-icon">🔗</span>
+                        <span class="ab-label">تبدیل لینک‌ها</span>
+                    </a>
+                </li>
+            `);
+            
+            $('#wp-admin-bar-top-secondary').append($button);
+            
+            $button.on('click', function(e) {
+                e.preventDefault();
+                convertExistingLinks();
+                alert('لینک‌ها با موفقیت تبدیل شدند!');
+            });
+        }
+    }
+
+    /**
+     * راه‌اندازی پلاگین
      */
     function init() {
-        console.log('🚀 راه‌اندازی Auto Proxy Links...');
-        console.log('🌐 دامنه منبع:', settings.source_domain);
-        console.log('🔗 دامنه پروکسی:', settings.proxy_domain);
-        
-        // اضافه کردن استایل‌ها
-        addStyles();
-        
+        if (settings.debug_mode) {
+            console.log('Auto Proxy Links: راه‌اندازی پلاگین با تنظیمات:', settings);
+        }
+
         // تبدیل لینک‌های موجود
         convertExistingLinks();
         
-        // نظارت بر لینک‌های جدید
-        observeNewLinks();
+        // تبدیل لینک‌های پویا
+        convertDynamicLinks();
         
-        // تست اتصال
-        testProxyConnection();
+        // تبدیل لینک‌های فرم
+        convertFormLinks();
         
-        console.log('✅ Auto Proxy Links آماده است');
+        // اضافه کردن دکمه تبدیل دستی
+        addManualConvertButton();
+        
+        // تبدیل مجدد در صورت تغییر محتوا
+        $(document).on('contentChanged', convertExistingLinks);
     }
-    
-    // راه‌اندازی پس از بارگذاری DOM
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-    
-    // در دسترس قرار دادن توابع برای استفاده خارجی
-    window.AutoProxyLinks = {
-        convertToProxyUrl: convertToProxyUrl,
-        convertExistingLinks: convertExistingLinks,
-        testProxyConnection: testProxyConnection
-    };
-    
+
+    // راه‌اندازی پس از آماده شدن DOM
+    $(document).ready(init);
+
+    // تبدیل مجدد در صورت تغییر محتوا (برای AJAX)
+    $(window).on('load', function() {
+        setTimeout(convertExistingLinks, 1000);
+    });
+
 })(jQuery);
 
 /**

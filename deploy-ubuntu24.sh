@@ -1,13 +1,18 @@
- #!/bin/bash
+#!/bin/bash
 
-# Auto-Link-Proxy - Ubuntu 24.04 Deployment Script
-# برای استقرار خودکار پروکسی PHP روی Ubuntu 24.04 VPS
-# GitHub: https://github.com/ayroop/Auto-Link-Proxy
-# Author: ayroop
-# Version: 2.0 - Ubuntu 24.04 + PHP 8.3
+# ========================================
+# اسکریپت استقرار خودکار پروکسی PHP برای Ubuntu 24.04
+# Auto Deployment Script for PHP Proxy on Ubuntu 24.04
+# ========================================
 
-set -e  # Exit on any error
+# تنظیمات پیش‌فرض
+# Default settings
+DOMAIN="tr.modulogic.space"
+EMAIL="your-email@example.com"
+PROXY_IP="185.235.196.22"
+SOURCE_HOST="sv1.neurobuild.space"
 
+# رنگ‌ها برای خروجی
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -15,21 +20,10 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Configuration - UPDATE THESE VALUES
-DOMAIN="filmkhabar.space"
-EMAIL="your-email@example.com"
-PROXY_DIR="/var/www/proxy"
-GITHUB_REPO="https://github.com/ayroop/Auto-Link-Proxy"
-GITHUB_RAW="https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main"
-PHP_VERSION="8.3"  # Ubuntu 24.04 default
-
-# Function to print colored output
-print_status() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+# تابع نمایش پیام
+# Function to display messages
+print_message() {
+    echo -e "${GREEN}[INFO]${NC} $1"
 }
 
 print_warning() {
@@ -38,6 +32,10 @@ print_warning() {
 
 print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
+}
+
+print_step() {
+    echo -e "${BLUE}[STEP]${NC} $1"
 }
 
 # Function to check if running as root
@@ -51,7 +49,7 @@ check_root() {
 
 # Function to check system requirements
 check_system() {
-    print_status "Checking system requirements..."
+    print_message "Checking system requirements..."
     
     # Check if Ubuntu 24.04
     if ! grep -q "Ubuntu 24.04" /etc/os-release; then
@@ -65,23 +63,23 @@ check_system() {
         print_warning "Low memory detected (${MEMORY}MB). Recommended: 1GB+"
     fi
     
-    print_success "System requirements check passed"
+    print_message "System requirements check passed"
 }
 
 # Function to update system
 update_system() {
-    print_status "Updating system packages..."
+    print_message "Updating system packages..."
     
     export DEBIAN_FRONTEND=noninteractive
     apt update -qq
     apt upgrade -y -qq
     
-    print_success "System updated successfully"
+    print_message "System updated successfully"
 }
 
 # Function to install required packages
 install_packages() {
-    print_status "Installing required packages for Ubuntu 24.04..."
+    print_message "Installing required packages for Ubuntu 24.04..."
     
     # Install packages with PHP 8.3 (Ubuntu 24.04 default)
     apt install -y -qq \
@@ -90,11 +88,11 @@ install_packages() {
         git \
         unzip \
         nginx \
-        php${PHP_VERSION}-fpm \
-        php${PHP_VERSION}-curl \
-        php${PHP_VERSION}-mbstring \
-        php${PHP_VERSION}-opcache \
-        php${PHP_VERSION}-zip \
+        php8.3-fpm \
+        php8.3-curl \
+        php8.3-mbstring \
+        php8.3-opcache \
+        php8.3-zip \
         certbot \
         python3-certbot-nginx \
         ufw \
@@ -103,12 +101,12 @@ install_packages() {
         iftop \
         net-tools
     
-    print_success "Packages installed successfully (PHP $PHP_VERSION)"
+    print_message "Packages installed successfully (PHP 8.3)"
 }
 
 # Function to configure Nginx
 configure_nginx() {
-    print_status "Configuring Nginx..."
+    print_message "Configuring Nginx..."
     
     # Remove default site
     rm -f /etc/nginx/sites-enabled/default
@@ -117,7 +115,7 @@ configure_nginx() {
     cat > /etc/nginx/sites-available/proxy << EOF
 server {
     listen 80;
-    server_name filmkhabar.space www.filmkhabar.space;
+    server_name tr.modulogic.space www.tr.modulogic.space;
     root /var/www/proxy;
     index proxy.php;
 
@@ -153,7 +151,7 @@ server {
     }
 
     location ~ \.php\$ {
-        fastcgi_pass unix:/var/run/php/php${PHP_VERSION}-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
         fastcgi_index proxy.php;
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
         include fastcgi_params;
@@ -187,18 +185,18 @@ EOF
     # Enable site
     ln -sf /etc/nginx/sites-available/proxy /etc/nginx/sites-enabled/
     
-    print_success "Nginx configured successfully"
+    print_message "Nginx configured successfully"
 }
 
 # Function to configure PHP
 configure_php() {
-    print_status "Configuring PHP $PHP_VERSION..."
+    print_message "Configuring PHP 8.3..."
     
     # Create proxy directory
-    mkdir -p $PROXY_DIR
+    mkdir -p /var/www/proxy
     
     # PHP settings for large files (based on your php_settings.ini)
-    cat > /etc/php/${PHP_VERSION}/fpm/conf.d/99-proxy.ini << 'EOF'
+    cat > /etc/php/8.3/fpm/conf.d/99-proxy.ini << 'EOF'
 ; PHP settings for large files
 memory_limit = 2G
 max_execution_time = 0
@@ -225,53 +223,53 @@ realpath_cache_ttl = 600
 EOF
 
     # Optimize PHP-FPM for low memory
-    sed -i 's/pm = dynamic/pm = ondemand/' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
-    sed -i 's/pm.max_children = 5/pm.max_children = 10/' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
-    sed -i 's/pm.start_servers = 2/pm.start_servers = 1/' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
-    sed -i 's/pm.min_spare_servers = 1/pm.min_spare_servers = 0/' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
-    sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 1/' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
+    sed -i 's/pm = dynamic/pm = ondemand/' /etc/php/8.3/fpm/pool.d/www.conf
+    sed -i 's/pm.max_children = 5/pm.max_children = 10/' /etc/php/8.3/fpm/pool.d/www.conf
+    sed -i 's/pm.start_servers = 2/pm.start_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
+    sed -i 's/pm.min_spare_servers = 1/pm.min_spare_servers = 0/' /etc/php/8.3/fpm/pool.d/www.conf
+    sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
     
-    print_success "PHP $PHP_VERSION configured successfully"
+    print_message "PHP 8.3 configured successfully"
 }
 
 # Function to download proxy files from GitHub
 download_files() {
-    print_status "Downloading proxy files from GitHub..."
+    print_message "Downloading proxy files from GitHub..."
     
-    cd $PROXY_DIR
+    cd /var/www/proxy
     
     # Download main files from your GitHub repository
-    wget -q $GITHUB_RAW/proxy.php -O proxy.php
-    wget -q $GITHUB_RAW/config.php -O config.php
-    wget -q $GITHUB_RAW/test_proxy.html -O test_proxy.html
-    wget -q $GITHUB_RAW/link_rewriter.php -O link_rewriter.php
-    wget -q $GITHUB_RAW/php_settings.ini -O php_settings.ini
+    wget -q https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/proxy.php -O proxy.php
+    wget -q https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/config.php -O config.php
+    wget -q https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/test_proxy.html -O test_proxy.html
+    wget -q https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/link_rewriter.php -O link_rewriter.php
+    wget -q https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/php_settings.ini -O php_settings.ini
     
     # Download .htaccess for Apache compatibility
-    wget -q $GITHUB_RAW/.htaccess -O .htaccess
+    wget -q https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/.htaccess -O .htaccess
     
     # Create logs directory
-    mkdir -p $PROXY_DIR/logs
-    touch $PROXY_DIR/logs/proxy_log.txt
-    touch $PROXY_DIR/logs/proxy_stats.json
+    mkdir -p /var/www/proxy/logs
+    touch /var/www/proxy/logs/proxy_log.txt
+    touch /var/www/proxy/logs/proxy_stats.json
     
     # Set permissions
-    chown -R www-data:www-data $PROXY_DIR
-    chmod -R 755 $PROXY_DIR
-    chmod 644 $PROXY_DIR/*.php
-    chmod 644 $PROXY_DIR/*.html
-    chmod 644 $PROXY_DIR/.htaccess
-    chmod 644 $PROXY_DIR/php_settings.ini
-    chmod 755 $PROXY_DIR/logs
-    chmod 666 $PROXY_DIR/logs/proxy_log.txt
-    chmod 666 $PROXY_DIR/logs/proxy_stats.json
+    chown -R www-data:www-data /var/www/proxy
+    chmod -R 755 /var/www/proxy
+    chmod 644 /var/www/proxy/*.php
+    chmod 644 /var/www/proxy/*.html
+    chmod 644 /var/www/proxy/.htaccess
+    chmod 644 /var/www/proxy/php_settings.ini
+    chmod 755 /var/www/proxy/logs
+    chmod 666 /var/www/proxy/logs/proxy_log.txt
+    chmod 666 /var/www/proxy/logs/proxy_stats.json
     
-    print_success "Proxy files downloaded successfully from GitHub"
+    print_message "Proxy files downloaded successfully from GitHub"
 }
 
 # Function to configure SSL
 configure_ssl() {
-    print_status "Configuring SSL certificate..."
+    print_message "Configuring SSL certificate..."
     
     # Get SSL certificate
     certbot --nginx -d $DOMAIN -d www.$DOMAIN --non-interactive --agree-tos --email $EMAIL --quiet
@@ -279,12 +277,12 @@ configure_ssl() {
     # Setup auto-renewal
     echo "0 12 * * * /usr/bin/certbot renew --quiet" | crontab -
     
-    print_success "SSL configured successfully"
+    print_message "SSL configured successfully"
 }
 
 # Function to configure firewall
 configure_firewall() {
-    print_status "Configuring firewall..."
+    print_message "Configuring firewall..."
     
     # Configure UFW
     ufw default deny incoming
@@ -326,12 +324,12 @@ EOF
     systemctl enable fail2ban
     systemctl start fail2ban
     
-    print_success "Firewall configured successfully"
+    print_message "Firewall configured successfully"
 }
 
 # Function to optimize system
 optimize_system() {
-    print_status "Optimizing system for unlimited bandwidth..."
+    print_message "Optimizing system for unlimited bandwidth..."
     
     # Network optimizations
     cat >> /etc/sysctl.conf << 'EOF'
@@ -386,12 +384,12 @@ http {
 }
 EOF
 
-    print_success "System optimized successfully"
+    print_message "System optimized successfully"
 }
 
 # Function to create monitoring script
 create_monitoring() {
-    print_status "Creating monitoring script..."
+    print_message "Creating monitoring script..."
     
     cat > /usr/local/bin/monitor-proxy.sh << EOF
 #!/bin/bash
@@ -401,7 +399,7 @@ echo "Memory Usage: \$(free -m | awk 'NR==2{printf "%.1f%%", \$3*100/\$2 }')"
 echo "Disk Usage: \$(df -h | grep '/dev/vda1' | awk '{print \$5}')"
 echo "Active Connections: \$(netstat -an | grep :80 | wc -l)"
 echo "Nginx Status: \$(systemctl is-active nginx)"
-echo "PHP-FPM Status: \$(systemctl is-active php${PHP_VERSION}-fpm)"
+echo "PHP-FPM Status: \$(systemctl is-active php8.3-fpm)"
 echo "SSL Certificate: \$(certbot certificates | grep -c 'VALID')"
 echo "Firewall Status: \$(ufw status | grep -c 'active')"
 echo ""
@@ -414,47 +412,47 @@ EOF
 
     chmod +x /usr/local/bin/monitor-proxy.sh
     
-    print_success "Monitoring script created"
+    print_message "Monitoring script created"
 }
 
 # Function to start services
 start_services() {
-    print_status "Starting services..."
+    print_message "Starting services..."
     
     # Start PHP-FPM
-    systemctl enable php${PHP_VERSION}-fpm
-    systemctl start php${PHP_VERSION}-fpm
+    systemctl enable php8.3-fpm
+    systemctl start php8.3-fpm
     
     # Start Nginx
     systemctl enable nginx
     systemctl start nginx
     
-    print_success "Services started successfully"
+    print_message "Services started successfully"
 }
 
 # Function to test deployment
 test_deployment() {
-    print_status "Testing deployment..."
+    print_message "Testing deployment..."
     
     sleep 5  # Wait for services to fully start
     
     # Test HTTP
     if curl -s -I http://$DOMAIN/proxy.php | grep -q "200 OK"; then
-        print_success "HTTP test passed"
+        print_message "HTTP test passed"
     else
         print_warning "HTTP test failed - check nginx configuration"
     fi
     
     # Test proxy functionality with a simple test
     if curl -s "http://$DOMAIN/proxy.php?url=https://httpbin.org/status/200" | grep -q "200"; then
-        print_success "Proxy functionality test passed"
+        print_message "Proxy functionality test passed"
     else
         print_warning "Proxy functionality test failed - check proxy.php configuration"
     fi
     
     # Test test page
     if curl -s -I http://$DOMAIN/test_proxy.html | grep -q "200 OK"; then
-        print_success "Test page accessible"
+        print_message "Test page accessible"
     else
         print_warning "Test page not accessible"
     fi
@@ -478,7 +476,7 @@ show_final_info() {
     echo -e "${BLUE}Useful Commands:${NC}"
     echo -e "  Monitor: /usr/local/bin/monitor-proxy.sh"
     echo -e "  Logs: tail -f /var/www/proxy/logs/proxy_log.txt"
-    echo -e "  Status: systemctl status nginx php${PHP_VERSION}-fpm"
+    echo -e "  Status: systemctl status nginx php8.3-fpm"
     echo -e "  Firewall: ufw status"
     echo ""
     echo -e "${YELLOW}Next Steps:${NC}"
@@ -488,7 +486,7 @@ show_final_info() {
     echo -e "  4. Consider installing WordPress plugin if needed"
     echo ""
     echo -e "${BLUE}GitHub Repository:${NC}"
-    echo -e "  $GITHUB_REPO"
+    echo -e "  https://github.com/ayroop/Auto-Link-Proxy"
     echo ""
     echo -e "${GREEN}Deployment completed successfully!${NC}"
 }
@@ -515,12 +513,12 @@ main() {
     echo -e "${BLUE}========================================${NC}"
     echo -e "${BLUE}    Auto-Link-Proxy Ubuntu 24.04 Deployment Script   ${NC}"
     echo -e "${BLUE}========================================${NC}"
-    echo -e "${BLUE}GitHub: $GITHUB_REPO${NC}"
-    echo -e "${BLUE}PHP Version: $PHP_VERSION${NC}"
+    echo -e "${BLUE}GitHub: https://github.com/ayroop/Auto-Link-Proxy${NC}"
+    echo -e "${BLUE}PHP Version: 8.3${NC}"
     echo ""
     
     # Check if configuration is updated
-    if [ "$DOMAIN" = "filmkhabar.space" ] || [ "$EMAIL" = "your-email@example.com" ]; then
+    if [ "$DOMAIN" = "tr.modulogic.space" ] || [ "$EMAIL" = "your-email@example.com" ]; then
         print_warning "Please update DOMAIN and EMAIL variables in the script before running!"
         show_config_instructions
         exit 1

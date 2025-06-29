@@ -1,12 +1,12 @@
 <?php
 /**
  * Plugin Name: Auto Proxy Links
- * Plugin URI: https://filmkhabar.space
- * Description: تبدیل خودکار لینک‌های sv1.neurobuild.space به لینک‌های پروکسی از طریق سرور ایرانی
+ * Plugin URI: https://tr.modulogic.space
+ * Description: تبدیل خودکار لینک‌های مستقیم به لینک‌های پروکسی برای دور زدن محدودیت‌های دانلود
  * Version: 1.0.0
- * Author: filmkhabar.space
- * Author URI: https://filmkhabar.space
- * License: GPL v2 or later
+ * Author: tr.modulogic.space
+ * Author URI: https://tr.modulogic.space
+ * License: MIT
  * Text Domain: auto-proxy-links
  * Domain Path: /languages
  */
@@ -23,18 +23,16 @@ define('APL_PLUGIN_VERSION', '1.0.0');
 
 // تنظیمات پیش‌فرض
 $default_settings = [
+    'enabled' => true,
+    'proxy_domain' => 'tr.modulogic.space',
     'source_domain' => 'sv1.neurobuild.space',
-    'proxy_domain' => 'filmkhabar.space',
-    'proxy_ip' => '45.12.143.141',
-    'proxy_path' => '/proxy.php',
-    'enable_posts' => true,
-    'enable_pages' => true,
-    'enable_widgets' => true,
-    'enable_comments' => false,
-    'enable_shortcode' => true,
-    'auto_convert' => true,
-    'show_proxy_info' => true,
-    'log_activity' => true
+    'allowed_hosts' => ['sv1.neurobuild.space'],
+    'allowed_extensions' => ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', 'm4v', 'zip', 'rar', '7z'],
+    'debug_mode' => false,
+    'auto_rewrite' => true,
+    'rewrite_posts' => true,
+    'rewrite_pages' => true,
+    'rewrite_widgets' => true
 ];
 
 /**
@@ -61,23 +59,18 @@ class AutoProxyLinks {
         add_action('wp_ajax_nopriv_test_proxy_connection', [$this, 'test_proxy_connection']);
         
         // فیلترهای محتوا
-        if ($this->settings['enable_posts']) {
+        if ($this->settings['rewrite_posts']) {
             add_filter('the_content', [$this, 'rewrite_content']);
         }
-        if ($this->settings['enable_pages']) {
+        if ($this->settings['rewrite_pages']) {
             add_filter('the_content', [$this, 'rewrite_content']);
         }
-        if ($this->settings['enable_widgets']) {
+        if ($this->settings['rewrite_widgets']) {
             add_filter('widget_text', [$this, 'rewrite_content']);
-        }
-        if ($this->settings['enable_comments']) {
-            add_filter('comment_text', [$this, 'rewrite_content']);
         }
         
         // شورت‌کد
-        if ($this->settings['enable_shortcode']) {
-            add_shortcode('proxy_link', [$this, 'proxy_link_shortcode']);
-        }
+        add_shortcode('proxy_link', [$this, 'proxy_link_shortcode']);
         
         // فعال‌سازی و غیرفعال‌سازی
         register_activation_hook(__FILE__, [$this, 'activate']);
@@ -139,14 +132,14 @@ class AutoProxyLinks {
      * اسکریپت‌های فرانت‌اند
      */
     public function frontend_scripts() {
-        if ($this->settings['auto_convert']) {
+        if ($this->settings['auto_rewrite']) {
             wp_enqueue_script('auto-proxy-links-frontend', APL_PLUGIN_URL . 'assets/js/auto-proxy-links.js', ['jquery'], APL_PLUGIN_VERSION, true);
             wp_localize_script('auto-proxy-links-frontend', 'apl_settings', [
-                'source_domain' => $this->settings['source_domain'],
                 'proxy_domain' => $this->settings['proxy_domain'],
-                'proxy_ip' => $this->settings['proxy_ip'],
-                'proxy_path' => $this->settings['proxy_path'],
-                'show_info' => $this->settings['show_proxy_info']
+                'source_domain' => $this->settings['source_domain'],
+                'allowed_hosts' => $this->settings['allowed_hosts'],
+                'allowed_extensions' => $this->settings['allowed_extensions'],
+                'debug_mode' => $this->settings['debug_mode']
             ]);
         }
     }
@@ -159,20 +152,40 @@ class AutoProxyLinks {
             return $content;
         }
         
-        $source_domain = $this->settings['source_domain'];
         $proxy_domain = $this->settings['proxy_domain'];
-        $proxy_path = $this->settings['proxy_path'];
+        $source_domain = $this->settings['source_domain'];
+        $allowed_hosts = $this->settings['allowed_hosts'];
+        $allowed_extensions = $this->settings['allowed_extensions'];
         
         // الگوی regex برای پیدا کردن لینک‌ها
         $pattern = '/https?:\/\/' . preg_quote($source_domain, '/') . '([^"\s\'<>]+)/i';
         
         // جایگزینی لینک‌ها
-        $content = preg_replace_callback($pattern, function($matches) use ($proxy_domain, $proxy_path) {
+        $content = preg_replace_callback($pattern, function($matches) use ($proxy_domain, $allowed_hosts, $allowed_extensions) {
             $original_url = $matches[0];
             $file_path = $matches[1];
             
+            // بررسی اینکه آیا URL از دامنه مجاز است
+            $is_allowed = false;
+            foreach ($allowed_hosts as $host) {
+                if (strpos($file_path, $host) !== false) {
+                    $is_allowed = true;
+                    break;
+                }
+            }
+            if (!$is_allowed) {
+                return $original_url;
+            }
+            
+            // بررسی اینکه آیا فایل از نوع مجاز است
+            $extension = pathinfo($file_path, PATHINFO_EXTENSION);
+            $is_allowed = in_array($extension, $allowed_extensions);
+            if (!$is_allowed) {
+                return $original_url;
+            }
+            
             // ساخت لینک پروکسی
-            $proxy_url = "https://{$proxy_domain}{$proxy_path}{$file_path}";
+            $proxy_url = "https://{$proxy_domain}{$file_path}";
             
             $this->log_activity("لینک تبدیل شد: {$original_url} -> {$proxy_url}");
             
@@ -198,11 +211,17 @@ class AutoProxyLinks {
         }
         
         $source_domain = $this->settings['source_domain'];
-        $proxy_domain = $this->settings['proxy_domain'];
-        $proxy_path = $this->settings['proxy_path'];
+        $allowed_hosts = $this->settings['allowed_hosts'];
         
-        // بررسی اینکه آیا URL از دامنه منبع است
-        if (strpos($atts['url'], $source_domain) === false) {
+        // بررسی اینکه آیا URL از دامنه مجاز است
+        $is_allowed = false;
+        foreach ($allowed_hosts as $host) {
+            if (strpos($atts['url'], $host) !== false) {
+                $is_allowed = true;
+                break;
+            }
+        }
+        if (!$is_allowed) {
             return '<span style="color: orange;">هشدار: URL از دامنه مجاز نیست</span>';
         }
         
@@ -212,8 +231,15 @@ class AutoProxyLinks {
             return '<span style="color: red;">خطا: مسیر فایل نامعتبر است</span>';
         }
         
+        // بررسی اینکه آیا فایل از نوع مجاز است
+        $extension = pathinfo($file_path, PATHINFO_EXTENSION);
+        $is_allowed = in_array($extension, $this->settings['allowed_extensions']);
+        if (!$is_allowed) {
+            return '<span style="color: red;">خطا: فایل از نوع مجاز نیست</span>';
+        }
+        
         // ساخت لینک پروکسی
-        $proxy_url = "https://{$proxy_domain}{$proxy_path}{$file_path}";
+        $proxy_url = "https://{$this->settings['proxy_domain']}{$file_path}";
         
         $this->log_activity("شورت‌کد لینک: {$atts['url']} -> {$proxy_url}");
         
@@ -285,18 +311,16 @@ class AutoProxyLinks {
         check_admin_referer('apl_settings');
         
         $settings = [
-            'source_domain' => sanitize_text_field($_POST['source_domain']),
+            'enabled' => isset($_POST['enabled']),
             'proxy_domain' => sanitize_text_field($_POST['proxy_domain']),
-            'proxy_ip' => sanitize_text_field($_POST['proxy_ip']),
-            'proxy_path' => sanitize_text_field($_POST['proxy_path']),
-            'enable_posts' => isset($_POST['enable_posts']),
-            'enable_pages' => isset($_POST['enable_pages']),
-            'enable_widgets' => isset($_POST['enable_widgets']),
-            'enable_comments' => isset($_POST['enable_comments']),
-            'enable_shortcode' => isset($_POST['enable_shortcode']),
-            'auto_convert' => isset($_POST['auto_convert']),
-            'show_proxy_info' => isset($_POST['show_proxy_info']),
-            'log_activity' => isset($_POST['log_activity'])
+            'source_domain' => sanitize_text_field($_POST['source_domain']),
+            'allowed_hosts' => array_map('sanitize_text_field', $_POST['allowed_hosts']),
+            'allowed_extensions' => array_map('sanitize_text_field', $_POST['allowed_extensions']),
+            'debug_mode' => isset($_POST['debug_mode']),
+            'auto_rewrite' => isset($_POST['auto_rewrite']),
+            'rewrite_posts' => isset($_POST['rewrite_posts']),
+            'rewrite_pages' => isset($_POST['rewrite_pages']),
+            'rewrite_widgets' => isset($_POST['rewrite_widgets'])
         ];
         
         update_option('auto_proxy_links_settings', $settings);
@@ -311,7 +335,7 @@ class AutoProxyLinks {
      * ثبت فعالیت
      */
     private function log_activity($message) {
-        if (!$this->settings['log_activity']) {
+        if (!$this->settings['debug_mode']) {
             return;
         }
         

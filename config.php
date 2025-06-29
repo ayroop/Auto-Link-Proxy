@@ -6,9 +6,10 @@
 
 // تنظیمات دامنه و پروکسی
 // Domain and proxy settings
-define('SOURCE_DOMAIN', 'sv1.neurobuild.space'); // دامنه منبع اصلی
-define('PROXY_DOMAIN', 'filmkhabar.space'); // دامنه پروکسی ایرانی
+define('SOURCE_DOMAIN', 'sv1.neurobuild.space'); // دامنه منبع اصلی (آلمان)
+define('PROXY_DOMAIN', 'tr.modulogic.space'); // دامنه پروکسی ایرانی
 define('PROXY_IP', '45.12.143.141'); // IP اختصاصی سرور ایرانی
+define('EXTERNAL_HOST', 'sv1.neurobuild.space'); // سرور خارجی (آلمان)
 
 // تنظیمات مسیر
 // Path settings
@@ -33,7 +34,11 @@ define('LOG_LEVEL', 'INFO'); // DEBUG, INFO, WARNING, ERROR
 
 // تنظیمات امنیت
 // Security settings
-define('ALLOWED_HOSTS', ['sv1.neurobuild.space', 'filmkhabar.space', '45.12.143.141']);
+define('ALLOWED_HOSTS', [
+    'sv1.neurobuild.space', // سرور آلمان
+    'tr.modulogic.space',   // سرور ایران
+    '45.12.143.141'        // IP سرور ایران
+]);
 define('BLOCKED_EXTENSIONS', ['php', 'php3', 'php4', 'php5', 'phtml', 'asp', 'aspx', 'jsp', 'exe', 'bat', 'cmd']);
 
 // تنظیمات WordPress
@@ -48,19 +53,19 @@ define('WP_OPTION_NAME', 'auto_proxy_links_settings');
 
 // دامنه‌های مجاز برای پروکسی
 const ALLOWED_HOSTS = [
-    'sv1.cinetory.space',
+    'sv1.neurobuild.space', // سرور آلمان - منبع اصلی
     // در صورت نیاز دامنه‌های دیگر را اضافه کنید
     // 'example.com',
     // 'another-domain.com',
 ];
 
 // آدرس پروکسی (دامنه ایران)
-const PROXY_DOMAIN = 'sv5.filmkhabar.space';
+const PROXY_DOMAIN = 'tr.modulogic.space';
 const PROXY_IP = '45.12.143.141'; // IP اختصاصی شما
 const PROXY_SCRIPT = 'proxy.php';
 
 // انتخاب آدرس پروکسی (دامنه یا IP)
-const USE_IP_INSTEAD_OF_DOMAIN = true; // true برای استفاده از IP، false برای دامنه
+const USE_IP_INSTEAD_OF_DOMAIN = false; // false برای استفاده از دامنه، true برای IP
 
 // =======================
 // === تنظیمات لاگ‌گیری ===
@@ -169,7 +174,7 @@ function isAllowedIP(string $ip): bool {
  */
 function getProxyUrl(string $originalUrl): string {
     $proxyAddress = USE_IP_INSTEAD_OF_DOMAIN ? PROXY_IP : PROXY_DOMAIN;
-    return 'http://' . $proxyAddress . '/' . PROXY_SCRIPT . '?url=' . urlencode($originalUrl);
+    return 'https://' . $proxyAddress . '/' . PROXY_SCRIPT . '?url=' . urlencode($originalUrl);
 }
 
 /**
@@ -191,30 +196,83 @@ function rotateLogFile(): void {
 // تنظیم محدودیت‌های PHP
 if (MAX_EXECUTION_TIME > 0) {
     set_time_limit(MAX_EXECUTION_TIME);
-} else {
-    set_time_limit(0);
 }
 
+// تنظیم محدودیت حافظه
 ini_set('memory_limit', MEMORY_LIMIT);
-ignore_user_abort(true);
 
-// =======================
-// === مثال استفاده ===
-// =======================
-
-/*
-// در فایل‌های دیگر:
-require_once 'config.php';
-
-// بررسی دامنه
-if (!isAllowedHost('sv1.cinetory.space')) {
-    die('دامنه مجاز نیست');
+// فعال‌سازی error reporting در حالت debug
+if (LOG_LEVEL === 'DEBUG') {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+} else {
+    error_reporting(0);
+    ini_set('display_errors', 0);
 }
 
-// تولید لینک پروکسی
-$proxyUrl = getProxyUrl('https://sv1.cinetory.space/file.mp4');
-echo $proxyUrl;
+// تنظیم timezone
+date_default_timezone_set('Asia/Tehran');
 
-// چرخش لاگ
-rotateLogFile();
-*/ 
+// =======================
+// === توابع لاگ‌گیری ===
+// =======================
+
+/**
+ * ثبت لاگ
+ */
+function logMessage(string $level, string $message): void {
+    if (!LOG_ENABLED) return;
+    
+    $timestamp = date('Y-m-d H:i:s');
+    $logEntry = "[{$timestamp}] [{$level}] {$message}" . PHP_EOL;
+    
+    // چرخش فایل لاگ در صورت نیاز
+    rotateLogFile();
+    
+    // نوشتن لاگ
+    file_put_contents(LOG_FILE, $logEntry, FILE_APPEND | LOCK_EX);
+}
+
+/**
+ * لاگ سطح DEBUG
+ */
+function logDebug(string $message): void {
+    if (LOG_LEVEL === 'DEBUG') {
+        logMessage('DEBUG', $message);
+    }
+}
+
+/**
+ * لاگ سطح INFO
+ */
+function logInfo(string $message): void {
+    if (in_array(LOG_LEVEL, ['DEBUG', 'INFO'])) {
+        logMessage('INFO', $message);
+    }
+}
+
+/**
+ * لاگ سطح WARNING
+ */
+function logWarning(string $message): void {
+    if (in_array(LOG_LEVEL, ['DEBUG', 'INFO', 'WARNING'])) {
+        logMessage('WARNING', $message);
+    }
+}
+
+/**
+ * لاگ سطح ERROR
+ */
+function logError(string $message): void {
+    logMessage('ERROR', $message);
+}
+
+// =======================
+// === تنظیمات JavaScript ===
+// =======================
+?>
+<script>
+const PROXY_DOMAIN = 'tr.modulogic.space';
+const SOURCE_DOMAIN = 'sv1.neurobuild.space';
+const PROXY_IP = '45.12.143.141';
+</script> 

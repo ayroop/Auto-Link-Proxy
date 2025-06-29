@@ -1,13 +1,18 @@
 #!/bin/bash
 
-# Auto-Link-Proxy - Single Command Deployment Script
-# برای استقرار خودکار پروکسی PHP روی Ubuntu VPS
-# GitHub: https://github.com/ayroop/Auto-Link-Proxy
-# Author: ayroop
-# Version: 1.0
+# ========================================
+# اسکریپت استقرار خودکار پروکسی PHP
+# Auto Deployment Script for PHP Proxy
+# ========================================
 
-set -e  # Exit on any error
+# تنظیمات پیش‌فرض
+# Default settings
+DOMAIN="tr.modulogic.space"
+EMAIL="your-email@example.com"
+PROXY_IP="45.12.143.141"
+SOURCE_HOST="sv1.neurobuild.space"
 
+# رنگ‌ها برای خروجی
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -15,20 +20,10 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Configuration - UPDATE THESE VALUES
-DOMAIN="filmkhabar.space"
-EMAIL="your-email@example.com"
-PROXY_DIR="/var/www/proxy"
-GITHUB_REPO="https://github.com/ayroop/Auto-Link-Proxy"
-GITHUB_RAW="https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main"
-
-# Function to print colored output
-print_status() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+# تابع نمایش پیام
+# Function to display messages
+print_message() {
+    echo -e "${GREEN}[INFO]${NC} $1"
 }
 
 print_warning() {
@@ -37,6 +32,19 @@ print_warning() {
 
 print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
+}
+
+print_step() {
+    echo -e "${BLUE}[STEP]${NC} $1"
+}
+
+# Function to print colored output
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
 # Function to check if running as root
@@ -120,11 +128,11 @@ configure_nginx() {
     cat > /etc/nginx/sites-available/proxy << 'EOF'
 server {
     listen 80;
-    server_name filmkhabar.space www.filmkhabar.space;
+    server_name tr.modulogic.space;
     root /var/www/proxy;
     index proxy.php;
 
-    # Large file settings
+    # تنظیمات فایل‌های بزرگ
     client_max_body_size 10G;
     client_body_timeout 300s;
     client_header_timeout 300s;
@@ -132,36 +140,26 @@ server {
     proxy_send_timeout 300s;
     proxy_read_timeout 300s;
 
-    # Performance settings
+    # تنظیمات عملکرد
     gzip on;
     gzip_types text/plain text/css application/json application/javascript;
     
-    # Security headers
+    # تنظیمات امنیتی
     server_tokens off;
     add_header X-Frame-Options DENY;
     add_header X-Content-Type-Options nosniff;
-
-    # CORS headers
-    add_header Access-Control-Allow-Origin "*";
-    add_header Access-Control-Allow-Methods "GET, HEAD, OPTIONS";
-    add_header Access-Control-Allow-Headers "Range, If-Range";
 
     location / {
         try_files $uri $uri/ /proxy.php?$args;
     }
 
-    # Handle proxy.php with path rewriting
-    location ~ ^/proxy\.php/(.*)$ {
-        rewrite ^/proxy\.php/(.*)$ /proxy.php?path=$1 last;
-    }
-
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
         fastcgi_index proxy.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
         
-        # Large file settings
+        # تنظیمات برای فایل‌های بزرگ
         fastcgi_read_timeout 300s;
         fastcgi_send_timeout 300s;
         fastcgi_connect_timeout 300s;
@@ -170,19 +168,13 @@ server {
         fastcgi_busy_buffers_size 256k;
     }
 
-    # Block sensitive files
+    # مسدود کردن دسترسی به فایل‌های حساس
     location ~ /\. {
         deny all;
     }
     
     location ~ \.(htaccess|htpasswd|ini|log|sh|sql|conf)$ {
         deny all;
-    }
-
-    # Cache video files
-    location ~* \.(mp4|avi|mkv|mov|wmv|flv|webm)$ {
-        expires 1M;
-        add_header Cache-Control "public, immutable";
     }
 }
 EOF
@@ -276,10 +268,12 @@ download_files() {
 configure_ssl() {
     print_status "Configuring SSL certificate..."
     
-    # Get SSL certificate
-    certbot --nginx -d $DOMAIN -d www.$DOMAIN --non-interactive --agree-tos --email $EMAIL --quiet
+    # نصب SSL
+    print_step "نصب گواهی SSL..."
+    certbot --nginx -d $DOMAIN --non-interactive --agree-tos --email $EMAIL --quiet
     
-    # Setup auto-renewal
+    # تنظیم تجدید خودکار SSL
+    print_step "تنظیم تجدید خودکار SSL..."
     echo "0 12 * * * /usr/bin/certbot renew --quiet" | crontab -
     
     print_success "SSL configured successfully"

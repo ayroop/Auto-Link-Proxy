@@ -1,47 +1,128 @@
-# راهنمای ساده استقرار پروکسی PHP روی Ubuntu VPS
+# 🚀 راهنمای استقرار پروکسی PHP
 
-## مشخصات سرور
-- **RAM**: 1GB
-- **CPU**: 1 هسته
-- **پهنای باند**: نامحدود
-- **هدف**: فقط پروکسی ویدیو
-- **PHP**: 8.3
-- **وب سرور**: Nginx
+راهنمای کامل استقرار پروکسی PHP برای دور زدن محدودیت‌های دانلود در ایران.
 
----
+## 🌐 دامنه‌های پروژه
 
-## مرحله 1: اتصال و به‌روزرسانی اولیه
+- **سرور پروکسی (ایران)**: `tr.modulogic.space`
+- **سرور منبع (آلمان)**: `sv1.neurobuild.space`
+- **IP سرور ایران**: `45.12.143.141`
 
-### اتصال به سرور:
+## 📋 پیش‌نیازها
+
+### سرور
+- Ubuntu 24.04 LTS
+- حداقل 1GB RAM
+- حداقل 10GB فضای دیسک
+- دسترسی root
+
+### دامنه
+- دامنه `tr.modulogic.space` اشاره به IP سرور
+- ایمیل معتبر برای گواهی SSL
+
+## 🔧 نصب و راه‌اندازی
+
+### مرحله 1: به‌روزرسانی سیستم
+
 ```bash
-ssh root@185.235.196.22
+# به‌روزرسانی پکیج‌ها
+sudo apt update && sudo apt upgrade -y
+
+# نصب پکیج‌های ضروری
+sudo apt install -y curl wget git unzip
 ```
 
-### به‌روزرسانی سیستم:
+### مرحله 2: نصب نرم‌افزارهای مورد نیاز
+
 ```bash
-apt update && apt upgrade -y
+# نصب Nginx
+sudo apt install -y nginx
+
+# نصب PHP 8.3 و ماژول‌های مورد نیاز
+sudo apt install -y php8.3-fpm php8.3-curl php8.3-mbstring php8.3-opcache php8.3-zip
+
+# نصب Certbot برای SSL
+sudo apt install -y certbot python3-certbot-nginx
+
+# نصب فایروال
+sudo apt install -y ufw fail2ban
 ```
 
-### نصب پکیج‌های ضروری:
+### مرحله 3: دانلود فایل‌های پروکسی
+
 ```bash
-apt install -y curl wget git unzip nginx php8.3-fpm php8.3-curl php8.3-mbstring php8.3-opcache certbot python3-certbot-nginx ufw fail2ban htop iftop net-tools
+# ایجاد پوشه پروکسی
+sudo mkdir -p /var/www/proxy
+cd /var/www/proxy
+
+# دانلود فایل‌های اصلی
+sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/proxy.php
+sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/config.php
+sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/test_proxy.html
+sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/link_rewriter.php
+sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/php_settings.ini
+sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/.htaccess
+
+# دانلود فایل‌های سرور
+sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/deploy.sh
+sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/deploy-ubuntu24.sh
+
+# دانلود فایل‌های پلاگین WordPress
+sudo mkdir -p /var/www/proxy/wordpress-plugin
+cd /var/www/proxy/wordpress-plugin
+sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/auto-proxy-links.php
+sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/uninstall.php
+
+# دانلود فایل‌های admin
+sudo mkdir -p /var/www/proxy/wordpress-plugin/admin
+cd /var/www/proxy/wordpress-plugin/admin
+sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/admin/admin-page.php
+
+# دانلود فایل‌های assets
+sudo mkdir -p /var/www/proxy/wordpress-plugin/assets/js
+cd /var/www/proxy/wordpress-plugin/assets/js
+sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/assets/js/auto-proxy-links.js
+
+# دانلود فایل‌های languages
+sudo mkdir -p /var/www/proxy/wordpress-plugin/languages
+cd /var/www/proxy/wordpress-plugin/languages
+sudo wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/languages/auto-proxy-links-fa_IR.po
+
+# بازگشت به پوشه اصلی
+cd /var/www/proxy
 ```
 
----
+### مرحله 4: تنظیم مجوزها
 
-## مرحله 2: پیکربندی Nginx
-
-### حذف سایت پیش‌فرض:
 ```bash
-rm -f /etc/nginx/sites-enabled/default
+# تنظیم مالکیت
+sudo chown -R www-data:www-data /var/www/proxy
+
+# تنظیم مجوزها
+sudo chmod -R 755 /var/www/proxy
+sudo chmod 644 /var/www/proxy/*.php
+sudo chmod 644 /var/www/proxy/*.html
+sudo chmod 644 /var/www/proxy/.htaccess
+sudo chmod 644 /var/www/proxy/php_settings.ini
+
+# ایجاد پوشه لاگ
+sudo mkdir -p /var/www/proxy/logs
+sudo touch /var/www/proxy/logs/proxy_log.txt
+sudo chmod 755 /var/www/proxy/logs
+sudo chmod 666 /var/www/proxy/logs/proxy_log.txt
 ```
 
-### ایجاد فایل سایت پروکسی:
+### مرحله 5: تنظیم Nginx
+
 ```bash
-cat > /etc/nginx/sites-available/proxy << 'EOF'
+# حذف سایت پیش‌فرض
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# ایجاد فایل سایت پروکسی
+sudo tee /etc/nginx/sites-available/proxy > /dev/null << 'EOF'
 server {
     listen 80;
-    server_name filmkhabar.space www.filmkhabar.space;
+    server_name tr.modulogic.space;
     root /var/www/proxy;
     index proxy.php;
 
@@ -91,205 +172,66 @@ server {
     }
 }
 EOF
+
+# فعال‌سازی سایت
+sudo ln -sf /etc/nginx/sites-available/proxy /etc/nginx/sites-enabled/
+
+# تست تنظیمات Nginx
+sudo nginx -t
+
+# راه‌اندازی مجدد Nginx
+sudo systemctl restart nginx
 ```
 
-### فعال کردن سایت:
+### مرحله 6: تنظیم PHP
+
 ```bash
-ln -sf /etc/nginx/sites-available/proxy /etc/nginx/sites-enabled/
-```
-
-### تست پیکربندی Nginx:
-```bash
-nginx -t
-```
-
----
-
-## مرحله 3: پیکربندی PHP برای پروکسی
-
-### ایجاد دایرکتوری سایت:
-```bash
-mkdir -p /var/www/proxy
-```
-
-### تنظیم PHP برای فایل‌های بزرگ:
-```bash
-cat > /etc/php/8.3/fpm/conf.d/99-proxy.ini << 'EOF'
-memory_limit = 512M
-max_execution_time = 300
+# تنظیمات PHP برای فایل‌های بزرگ
+sudo tee /etc/php/8.3/fpm/conf.d/99-proxy.ini > /dev/null << 'EOF'
+; PHP settings for large files
+memory_limit = 2G
+max_execution_time = 0
 max_input_time = 300
 post_max_size = 10G
 upload_max_filesize = 10G
 max_file_uploads = 100
-output_buffering = 4096
-implicit_flush = On
+default_socket_timeout = 300
 EOF
+
+# بهینه‌سازی PHP-FPM
+sudo sed -i 's/pm = dynamic/pm = ondemand/' /etc/php/8.3/fpm/pool.d/www.conf
+sudo sed -i 's/pm.max_children = 5/pm.max_children = 10/' /etc/php/8.3/fpm/pool.d/www.conf
+sudo sed -i 's/pm.start_servers = 2/pm.start_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
+sudo sed -i 's/pm.min_spare_servers = 1/pm.min_spare_servers = 0/' /etc/php/8.3/fpm/pool.d/www.conf
+sudo sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
+
+# راه‌اندازی مجدد PHP-FPM
+sudo systemctl restart php8.3-fpm
 ```
 
-### تنظیم PHP-FPM برای عملکرد بهتر:
+### مرحله 7: تنظیم SSL
+
 ```bash
-sed -i 's/pm = dynamic/pm = ondemand/' /etc/php/8.3/fpm/pool.d/www.conf
-sed -i 's/pm.max_children = 5/pm.max_children = 10/' /etc/php/8.3/fpm/pool.d/www.conf
-sed -i 's/pm.start_servers = 2/pm.start_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
-sed -i 's/pm.min_spare_servers = 1/pm.min_spare_servers = 0/' /etc/php/8.3/fpm/pool.d/www.conf
-sed -i 's/pm.max_spare_servers = 3/pm.max_spare_servers = 1/' /etc/php/8.3/fpm/pool.d/www.conf
+# دریافت گواهی SSL
+sudo certbot --nginx -d tr.modulogic.space --non-interactive --agree-tos --email your-email@example.com --quiet
+
+# تنظیم تجدید خودکار SSL
+echo "0 12 * * * /usr/bin/certbot renew --quiet" | sudo crontab -
 ```
 
-### بررسی وجود socket PHP-FPM:
+### مرحله 8: تنظیم فایروال
+
 ```bash
-ls -la /var/run/php/php8.3-fpm.sock
-```
+# تنظیم UFW
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw --force enable
 
----
-
-## مرحله 4: آپلود فایل‌های پروکسی
-
-### آپلود فایل‌های پروکسی (انتخاب یکی از روش‌ها):
-
-#### روش 1: آپلود مستقیم از GitHub:
-```bash
-# رفتن به دایرکتوری سایت
-cd /var/www/proxy
-
-# دانلود فایل‌های اصلی پروکسی
-wget -O proxy.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/proxy.php
-wget -O config.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/config.php
-wget -O test_proxy.html https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/test_proxy.html
-wget -O link_rewriter.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/link_rewriter.php
-wget -O debug_proxy.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/debug_proxy.php
-wget -O simple_ip_test.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/simple_ip_test.php
-wget -O proxy_ip_test.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/proxy_ip_test.php
-wget -O test_simple.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/test_simple.php
-
-# دانلود فایل‌های تنظیمات سرور
-wget -O php_settings.ini https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/php_settings.ini
-wget -O .htaccess https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/.htaccess
-
-# دانلود فایل‌های مستندات
-wget -O README.md https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/README.md
-wget -O QUICK_CONFIG.md https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/QUICK_CONFIG.md
-wget -O SETUP_GUIDE.md https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/SETUP_GUIDE.md
-wget -O SECURITY.md https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/SECURITY.md
-
-# دانلود WordPress Plugin (اختیاری)
-mkdir -p /var/www/proxy/wordpress-plugin
-cd /var/www/proxy/wordpress-plugin
-wget -O auto-proxy-links.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/auto-proxy-links.php
-wget -O uninstall.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/uninstall.php
-wget -O README.md https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/README.md
-wget -O install-guide.md https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/install-guide.md
-
-# دانلود فایل‌های admin
-mkdir -p /var/www/proxy/wordpress-plugin/admin
-cd /var/www/proxy/wordpress-plugin/admin
-wget -O admin-page.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/admin/admin-page.php
-
-# دانلود فایل‌های assets
-mkdir -p /var/www/proxy/wordpress-plugin/assets/js
-cd /var/www/proxy/wordpress-plugin/assets/js
-wget -O auto-proxy-links.js https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/assets/js/auto-proxy-links.js
-
-# دانلود فایل‌های languages
-mkdir -p /var/www/proxy/wordpress-plugin/languages
-cd /var/www/proxy/wordpress-plugin/languages
-wget -O auto-proxy-links-fa_IR.po https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/languages/auto-proxy-links-fa_IR.po
-
-# بازگشت به دایرکتوری اصلی
-cd /var/www/proxy
-```
-
-#### روش 2: آپلود دستی از کامپیوتر محلی:
-```bash
-# رفتن به دایرکتوری سایت
-cd /var/www/proxy
-
-# در ترمینال محلی خود اجرا کنید:
-scp proxy.php config.php test_proxy.html link_rewriter.php debug_proxy.php simple_ip_test.php proxy_ip_test.php test_simple.php php_settings.ini .htaccess root@185.235.196.22:/var/www/proxy/
-
-# آپلود WordPress Plugin (اختیاری)
-scp -r wordpress-plugin/ root@185.235.196.22:/var/www/proxy/
-```
-
-#### روش 3: Clone کامل repository:
-```bash
-# نصب git (اگر نصب نیست)
-apt install -y git
-
-# Clone کردن repository
-cd /var/www
-git clone https://github.com/ayroop/Auto-Link-Proxy.git proxy
-cd proxy
-
-# حذف فایل‌های غیرضروری
-rm -rf .git .github .gitignore CHANGELOG.md CODE_OF_CONDUCT.md CONTRIBUTING.md LICENSE
-```
-
-### تنظیم مجوزها:
-```bash
-# تنظیم مالکیت
-chown -R www-data:www-data /var/www/proxy
-
-# تنظیم مجوزهای دایرکتوری‌ها
-find /var/www/proxy -type d -exec chmod 755 {} \;
-
-# تنظیم مجوزهای فایل‌های PHP
-find /var/www/proxy -name "*.php" -exec chmod 644 {} \;
-
-# تنظیم مجوزهای فایل‌های HTML
-find /var/www/proxy -name "*.html" -exec chmod 644 {} \;
-
-# تنظیم مجوزهای فایل‌های تنظیمات
-chmod 644 /var/www/proxy/*.ini
-chmod 644 /var/www/proxy/.htaccess
-
-# تنظیم مجوزهای فایل‌های مستندات
-chmod 644 /var/www/proxy/*.md
-
-# تنظیم مجوزهای WordPress Plugin
-chmod -R 755 /var/www/proxy/wordpress-plugin
-find /var/www/proxy/wordpress-plugin -name "*.php" -exec chmod 644 {} \;
-find /var/www/proxy/wordpress-plugin -name "*.js" -exec chmod 644 {} \;
-find /var/www/proxy/wordpress-plugin -name "*.po" -exec chmod 644 {} \;
-```
-
-### ایجاد دایرکتوری لاگ:
-```bash
-mkdir -p /var/www/proxy/logs
-chown www-data:www-data /var/www/proxy/logs
-chmod 755 /var/www/proxy/logs
-```
-
----
-
-## مرحله 5: نصب SSL
-
-### دریافت گواهی SSL:
-```bash
-certbot --nginx -d filmkhabar.space -d www.filmkhabar.space --non-interactive --agree-tos --email your-email@example.com
-```
-
-### تنظیم تجدید خودکار:
-```bash
-echo "0 12 * * * /usr/bin/certbot renew --quiet" | crontab -
-```
-
----
-
-## مرحله 6: پیکربندی فایروال
-
-### تنظیم UFW:
-```bash
-ufw default deny incoming
-ufw default allow outgoing
-ufw allow ssh
-ufw allow 80/tcp
-ufw allow 443/tcp
-ufw --force enable
-```
-
-### تنظیم Fail2ban:
-```bash
-cat > /etc/fail2ban/jail.local << 'EOF'
+# تنظیم Fail2ban
+sudo tee /etc/fail2ban/jail.local > /dev/null << 'EOF'
 [DEFAULT]
 bantime = 3600
 findtime = 600
@@ -308,240 +250,182 @@ filter = nginx-http-auth
 port = http,https
 logpath = /var/log/nginx/error.log
 maxretry = 3
+
+[nginx-botsearch]
+enabled = true
+filter = nginx-botsearch
+port = http,https
+logpath = /var/log/nginx/access.log
+maxretry = 2
 EOF
+
+sudo systemctl enable fail2ban
+sudo systemctl start fail2ban
 ```
 
-### راه‌اندازی Fail2ban:
+### مرحله 9: بهینه‌سازی سیستم
+
 ```bash
-systemctl enable fail2ban
-systemctl start fail2ban
-```
-
----
-
-## مرحله 7: راه‌اندازی سرویس‌ها
-
-### راه‌اندازی PHP-FPM:
-```bash
-systemctl enable php8.3-fpm
-systemctl start php8.3-fpm
-```
-
-### راه‌اندازی Nginx:
-```bash
-systemctl enable nginx
-systemctl start nginx
-```
-
-### بررسی وضعیت:
-```bash
-systemctl status nginx php8.3-fpm
-```
-
----
-
-## مرحله 8: تست و بهینه‌سازی
-
-### تست اتصال:
-```bash
-curl -I http://filmkhabar.space/proxy.php
-```
-
-### تست SSL:
-```bash
-curl -I https://filmkhabar.space/proxy.php
-```
-
-### تست پروکسی:
-```bash
-curl -I "https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/test.mp4"
-```
-
-### بررسی لاگ‌ها:
-```bash
-tail -f /var/log/nginx/error.log
-tail -f /var/log/nginx/access.log
-tail -f /var/www/proxy/logs/error.log
-```
-
-### بررسی استفاده از منابع:
-```bash
-htop
-```
-
----
-
-## مرحله 9: بهینه‌سازی برای پهنای باند نامحدود
-
-### تنظیمات شبکه برای عملکرد بهتر:
-```bash
-cat >> /etc/sysctl.conf << 'EOF'
-# تنظیمات TCP برای عملکرد بهتر
+# بهینه‌سازی شبکه
+sudo tee -a /etc/sysctl.conf > /dev/null << 'EOF'
+# TCP optimizations for unlimited bandwidth
 net.core.rmem_max = 16777216
 net.core.wmem_max = 16777216
 net.ipv4.tcp_rmem = 4096 87380 16777216
 net.ipv4.tcp_wmem = 4096 65536 16777216
 net.ipv4.tcp_congestion_control = bbr
 net.core.default_qdisc = fq
+net.core.netdev_max_backlog = 5000
+net.ipv4.tcp_max_syn_backlog = 2048
 EOF
+
+# اعمال تنظیمات
+sudo sysctl -p
 ```
 
-### اعمال تنظیمات:
+### مرحله 10: ایجاد اسکریپت مانیتورینگ
+
 ```bash
-sysctl -p
-```
-
-### تنظیمات Nginx برای عملکرد بهتر:
-```bash
-# Backup فایل اصلی
-cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup
-
-# اضافه کردن تنظیمات به nginx.conf
-cat >> /etc/nginx/nginx.conf << 'EOF'
-# تنظیمات worker
-worker_processes auto;
-worker_rlimit_nofile 65536;
-
-events {
-    worker_connections 1024;
-    use epoll;
-    multi_accept on;
-}
-
-http {
-    # تنظیمات buffer
-    client_body_buffer_size 128k;
-    client_header_buffer_size 1k;
-    large_client_header_buffers 4 4k;
-    
-    # تنظیمات timeout
-    client_body_timeout 300s;
-    client_header_timeout 300s;
-    keepalive_timeout 65;
-    send_timeout 300s;
-    
-    # تنظیمات sendfile
-    sendfile on;
-    tcp_nopush on;
-    tcp_nodelay on;
-}
-EOF
-```
-
----
-
-## مرحله 10: نظارت ساده
-
-### ایجاد اسکریپت نظارت:
-```bash
-cat > /usr/local/bin/monitor-proxy.sh << 'EOF'
+# ایجاد اسکریپت مانیتورینگ
+sudo tee /usr/local/bin/monitor-proxy.sh > /dev/null << 'EOF'
 #!/bin/bash
-echo "=== گزارش پروکسی $(date) ==="
-echo "CPU: $(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)%"
-echo "RAM: $(free -m | awk 'NR==2{printf "%.1f%%", $3*100/$2 }')"
-echo "Disk: $(df -h | grep '/dev/vda1' | awk '{print $5}')"
-echo "Connections: $(netstat -an | grep :80 | wc -l)"
-echo "PHP-FPM Status:"
-systemctl status php8.3-fpm --no-pager -l
-echo "Nginx Status:"
-systemctl status nginx --no-pager -l
+echo "=== Auto-Link-Proxy Status Report $(date) ==="
+echo "CPU Usage: $(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)%"
+echo "Memory Usage: $(free -m | awk 'NR==2{printf "%.1f%%", $3*100/$2 }')"
+echo "Disk Usage: $(df -h | grep '/dev/vda1' | awk '{print $5}')"
+echo "Active Connections: $(netstat -an | grep :80 | wc -l)"
+echo "Nginx Status: $(systemctl is-active nginx)"
+echo "PHP-FPM Status: $(systemctl is-active php8.3-fpm)"
+echo "SSL Certificate: $(certbot certificates | grep -c 'VALID')"
+echo "Firewall Status: $(ufw status | grep -c 'active')"
+echo ""
+echo "Recent Proxy Logs:"
+tail -5 /var/www/proxy/logs/proxy_log.txt 2>/dev/null || echo "No logs found"
+echo ""
+echo "Recent Nginx Errors:"
+tail -5 /var/log/nginx/error.log 2>/dev/null || echo "No errors found"
 EOF
+
+sudo chmod +x /usr/local/bin/monitor-proxy.sh
 ```
 
-### تنظیم مجوز اسکریپت:
+## 🧪 تست استقرار
+
+### تست HTTP
+
 ```bash
-chmod +x /usr/local/bin/monitor-proxy.sh
+# تست اتصال HTTP
+curl -I http://tr.modulogic.space/proxy.php
+
+# تست عملکرد پروکسی
+curl "http://tr.modulogic.space/proxy.php?url=https://httpbin.org/status/200"
 ```
+
+### تست HTTPS
+
+```bash
+# تست اتصال HTTPS
+curl -I https://tr.modulogic.space/proxy.php
+
+# تست عملکرد پروکسی HTTPS
+curl "https://tr.modulogic.space/proxy.php?url=https://httpbin.org/status/200"
+```
+
+### تست صفحه
+
+```bash
+# تست صفحه تست
+curl -I https://tr.modulogic.space/test_proxy.html
+```
+
+## 📊 مانیتورینگ و نگهداری
+
+### دستورات مفید
+
+```bash
+# بررسی وضعیت سرویس‌ها
+sudo systemctl status nginx php8.3-fpm
+
+# راه‌اندازی مجدد سرویس‌ها
+sudo systemctl restart nginx php8.3-fpm
+
+# بررسی لاگ‌ها
+sudo tail -f /var/www/proxy/logs/proxy_log.txt
+sudo tail -f /var/log/nginx/error.log
+
+# اجرای اسکریپت مانیتورینگ
+sudo /usr/local/bin/monitor-proxy.sh
+
+# بررسی گواهی SSL
+sudo certbot certificates
+
+# بررسی فایروال
+sudo ufw status
+```
+
+### به‌روزرسانی خودکار
+
+```bash
+# ایجاد اسکریپت به‌روزرسانی
+sudo tee /usr/local/bin/update-proxy.sh > /dev/null << 'EOF'
+#!/bin/bash
+cd /var/www/proxy
+sudo wget -O proxy.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/proxy.php
+sudo wget -O config.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/config.php
+sudo wget -O test_proxy.html https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/test_proxy.html
+sudo chown www-data:www-data *.php *.html
+sudo chmod 644 *.php *.html
+sudo systemctl reload nginx
+echo "Proxy updated successfully!"
+EOF
+
+sudo chmod +x /usr/local/bin/update-proxy.sh
+```
+
+## 🔧 عیب‌یابی
+
+### مشکلات رایج
+
+#### خطای 502 Bad Gateway
+```bash
+# بررسی وضعیت PHP-FPM
+sudo systemctl status php8.3-fpm
+
+# بررسی لاگ‌های PHP-FPM
+sudo tail -f /var/log/php8.3-fpm.log
+```
+
+#### خطای SSL
+```bash
+# بررسی گواهی SSL
+sudo certbot certificates
+
+# تجدید دستی گواهی
+sudo certbot renew --dry-run
+```
+
+#### خطای مجوز
+```bash
+# تنظیم مجدد مجوزها
+sudo chown -R www-data:www-data /var/www/proxy
+sudo chmod -R 755 /var/www/proxy
+```
+
+## 📞 پشتیبانی
+
+### آدرس‌های مهم
+
+- **پروکسی**: https://tr.modulogic.space/proxy.php
+- **صفحه تست**: https://tr.modulogic.space/test_proxy.html
+- **مخزن GitHub**: https://github.com/ayroop/Auto-Link-Proxy
+
+### لاگ‌های مهم
+
+- `/var/www/proxy/logs/proxy_log.txt` - لاگ‌های پروکسی
+- `/var/log/nginx/access.log` - لاگ‌های دسترسی Nginx
+- `/var/log/nginx/error.log` - لاگ‌های خطای Nginx
+- `/var/log/php8.3-fpm.log` - لاگ‌های PHP-FPM
 
 ---
 
-## دستورات مفید
-
-### بررسی وضعیت سرویس‌ها:
-```bash
-systemctl status nginx php8.3-fpm
-```
-
-### مشاهده لاگ‌های زنده:
-```bash
-tail -f /var/log/nginx/access.log
-```
-
-### نظارت بر پهنای باند:
-```bash
-iftop
-```
-
-### بررسی فایل‌های پروکسی:
-```bash
-ls -la /var/www/proxy/
-```
-
-### تست پروکسی:
-```bash
-curl "https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/test.mp4"
-```
-
-### اجرای اسکریپت نظارت:
-```bash
-/usr/local/bin/monitor-proxy.sh
-```
-
-### بررسی socket PHP-FPM:
-```bash
-ls -la /var/run/php/php8.3-fpm.sock
-```
-
-### تست پیکربندی Nginx:
-```bash
-nginx -t
-```
-
----
-
-## آدرس‌های مهم
-
-- **پروکسی اصلی**: https://filmkhabar.space/proxy.php
-- **صفحه تست**: https://filmkhabar.space/test_proxy.html
-- **مثال استفاده**: `https://filmkhabar.space/proxy.php?url=https://sv1.cinetory.space/video.mp4`
-
----
-
-## عیب‌یابی
-
-### مشکل: PHP-FPM کار نمی‌کند
-```bash
-systemctl status php8.3-fpm
-journalctl -u php8.3-fpm -f
-```
-
-### مشکل: Nginx خطا می‌دهد
-```bash
-nginx -t
-systemctl status nginx
-tail -f /var/log/nginx/error.log
-```
-
-### مشکل: فایل‌ها آپلود نمی‌شوند
-```bash
-ls -la /var/www/proxy/
-chown -R www-data:www-data /var/www/proxy
-```
-
-### مشکل: SSL کار نمی‌کند
-```bash
-certbot certificates
-certbot renew --dry-run
-```
-
----
-
-## نکات مهم
-
-✅ **بهینه شده برای 1GB RAM**: تنظیمات PHP و Nginx بهینه شده  
-✅ **پشتیبانی از فایل‌های بزرگ**: تا 10GB  
-✅ **پهنای باند نامحدود**: تنظیمات TCP بهینه شده  
-✅ **امنیت پایه**: SSL، فایروال، Fail2ban  
-✅ **PHP 8.3**: آخرین نسخه پایدار  
-✅ **نظارت خودکار**: اسکریپت‌های نظارت و لاگ‌گیری  
-✅ **عیب‌یابی آسان**: دستورات مفید برای تشخیص مشکلات  
+**نکته**: این راهنما برای استقرار کامل و امن پروکسی PHP طراحی شده است. لطفاً تمام مراحل را با دقت دنبال کنید.
