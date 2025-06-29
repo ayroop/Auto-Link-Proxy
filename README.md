@@ -64,22 +64,60 @@ curl -sSL https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/deploy.s
 ssh root@your-server-ip
 ```
 
-**2. دانلود و ویرایش اسکریپت:**
+**2. دانلود اسکریپت:**
 ```bash
 wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/deploy.sh
-nano deploy.sh
 ```
 
-**3. تغییر تنظیمات:**
+**3. تنظیم دامنه خود:**
 ```bash
-# این خطوط را در فایل deploy.sh تغییر دهید:
-DOMAIN="your-domain.com"        # دامنه خود را وارد کنید
-EMAIL="your-email@example.com"  # ایمیل خود را وارد کنید
+sed -i 's/DOMAIN="filmkhabar.space"/DOMAIN="your-domain.com"/' deploy.sh
 ```
 
-**4. اجرای استقرار:**
+**4. تنظیم ایمیل خود:**
+```bash
+sed -i 's/EMAIL="your-email@example.com"/EMAIL="your-actual-email@example.com"/' deploy.sh
+```
+
+**5. اجرای استقرار:**
 ```bash
 sudo bash deploy.sh
+```
+
+### 🎯 مثال کامل
+
+```bash
+# اتصال به سرور
+ssh root@185.235.196.22
+
+# دانلود اسکریپت
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/deploy.sh
+
+# تنظیم دامنه (جایگزین کنید)
+sed -i 's/DOMAIN="filmkhabar.space"/DOMAIN="myproxy.com"/' deploy.sh
+
+# تنظیم ایمیل (جایگزین کنید)
+sed -i 's/EMAIL="your-email@example.com"/EMAIL="admin@myproxy.com"/' deploy.sh
+
+# اجرای استقرار
+sudo bash deploy.sh
+```
+
+### 🔧 تنظیمات پیشرفته (اختیاری)
+
+**تنظیم مسیر پروکسی:**
+```bash
+sed -i 's|PROXY_DIR="/var/www/proxy"|PROXY_DIR="/var/www/myproxy"|' deploy.sh
+```
+
+**تنظیم اندازه فایل حداکثر:**
+```bash
+sed -i 's/memory_limit = 2G/memory_limit = 4G/' deploy.sh
+```
+
+**تنظیم timeout:**
+```bash
+sed -i 's/max_execution_time = 0/max_execution_time = 600/' deploy.sh
 ```
 
 ### 🎯 آنچه به صورت خودکار نصب می‌شود
