@@ -335,9 +335,7 @@ opcache.memory_consumption = 128
 
 ### اطلاعات تماس
 
-- **وب‌سایت**: https://filmkhabar.space
-- **ایمیل**: support@filmkhabar.space
-- **تلگرام**: @filmkhabar_support
+- **وب‌سایت**: https://ayrop.com
 
 ### گزارش مشکلات
 
