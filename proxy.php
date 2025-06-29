@@ -236,9 +236,13 @@ class VideoProxy {
         // حذف headers غیرضروری
         $skipHeaders = [
             'transfer-encoding', 'connection', 'keep-alive',
-            'proxy-authenticate', 'proxy-authorization', 'content-disposition'
+            'proxy-authenticate', 'proxy-authorization', 'content-disposition',
+            'content-type', 'content-length', 'accept-ranges', 'content-range'
         ];
-        
+        $contentType = null;
+        $contentLength = null;
+        $contentRange = null;
+        $has206 = false;
         foreach ($responseHeaders as $header) {
             $headerLower = strtolower($header);
             $shouldSkip = false;
@@ -251,29 +255,57 @@ class VideoProxy {
             if (!$shouldSkip) {
                 header($header, false);
             }
+            // استخراج Content-Type و Content-Length و Content-Range
+            if (stripos($header, 'Content-Type:') === 0) {
+                $contentType = trim(substr($header, 13));
+            }
+            if (stripos($header, 'Content-Length:') === 0) {
+                $contentLength = trim(substr($header, 15));
+            }
+            if (stripos($header, 'Content-Range:') === 0) {
+                $contentRange = trim(substr($header, 14));
+            }
+            if (preg_match('/^HTTP\/\d\.\d\s+206/', $header)) {
+                $has206 = true;
+            }
         }
-        
+        // --- استخراج نام فایل به صورت هوشمند ---
+        $filename = '';
+        $urlParam = $_GET['url'] ?? '';
+        if ($urlParam) {
+            $parsed = parse_url($urlParam);
+            $filename = isset($parsed['path']) ? basename($parsed['path']) : '';
+        }
+        if (!$filename || strpos($filename, '.') === false) {
+            $filename = basename($filePath);
+        }
+        if (!$filename || strpos($filename, '.') === false) {
+            $filename = 'video.mp4';
+        }
+        // --- تنظیم هدرهای اصلی ---
+        if ($contentType) {
+            header('Content-Type: ' . $contentType, true);
+        } else {
+            header('Content-Type: application/octet-stream', true);
+        }
+        if ($contentLength) {
+            header('Content-Length: ' . $contentLength, true);
+        }
+        if ($contentRange) {
+            header('Content-Range: ' . $contentRange, true);
+        }
+        // پشتیبانی از Resume
+        header('Accept-Ranges: bytes', true);
+        // اگر 206 Partial Content بود، باید Content-Range هم باشد
+        // --- Content-Disposition ---
+        header('Content-Disposition: inline; filename="' . $filename . '"', true);
         // اضافه کردن headers امنیتی
         header('X-Proxy-Server: filmkhabar.space');
         header('X-Source-Domain: ' . $this->sourceDomain);
-        
         // تنظیم CORS برای درخواست‌های AJAX
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS');
         header('Access-Control-Allow-Headers: Range, If-Range, If-Modified-Since, If-None-Match');
-
-        // --- استخراج نام فایل به صورت هوشمند ---
-        $filename = basename($filePath);
-        if (!$filename || strpos($filename, '.') === false) {
-            $urlParam = $_GET['url'] ?? '';
-            if ($urlParam) {
-                $parsed = parse_url($urlParam);
-                $filename = isset($parsed['path']) ? basename($parsed['path']) : '';
-            }
-            if (!$filename) $filename = 'video.mp4';
-        }
-        // همیشه Content-Disposition را آخر بفرست
-        header('Content-Disposition: inline; filename="' . $filename . '"', true);
     }
     
     private function streamContent($stream) {
