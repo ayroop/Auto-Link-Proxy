@@ -144,121 +144,112 @@ ls -la /var/run/php/php8.3-fpm.sock
 
 ## مرحله 4: آپلود فایل‌های پروکسی
 
-### رفتن به دایرکتوری سایت:
-```bash
-cd /var/www/proxy
-```
-
 ### آپلود فایل‌های پروکسی (انتخاب یکی از روش‌ها):
 
-#### روش 1: آپلود مستقیم از GitHub (اگر فایل‌ها در GitHub هستند):
+#### روش 1: آپلود مستقیم از GitHub:
 ```bash
-wget -O proxy.php https://raw.githubusercontent.com/your-repo/main/proxy.php
-wget -O config.php https://raw.githubusercontent.com/your-repo/main/config.php
-wget -O test_proxy.html https://raw.githubusercontent.com/your-repo/main/test_proxy.html
+# رفتن به دایرکتوری سایت
+cd /var/www/proxy
+
+# دانلود فایل‌های اصلی پروکسی
+wget -O proxy.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/proxy.php
+wget -O config.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/config.php
+wget -O test_proxy.html https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/test_proxy.html
+wget -O link_rewriter.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/link_rewriter.php
+wget -O debug_proxy.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/debug_proxy.php
+wget -O simple_ip_test.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/simple_ip_test.php
+wget -O proxy_ip_test.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/proxy_ip_test.php
+wget -O test_simple.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/test_simple.php
+
+# دانلود فایل‌های تنظیمات سرور
+wget -O php_settings.ini https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/php_settings.ini
+wget -O .htaccess https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/.htaccess
+
+# دانلود فایل‌های مستندات
+wget -O README.md https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/README.md
+wget -O QUICK_CONFIG.md https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/QUICK_CONFIG.md
+wget -O SETUP_GUIDE.md https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/SETUP_GUIDE.md
+wget -O SECURITY.md https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/SECURITY.md
+
+# دانلود WordPress Plugin (اختیاری)
+mkdir -p /var/www/proxy/wordpress-plugin
+cd /var/www/proxy/wordpress-plugin
+wget -O auto-proxy-links.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/auto-proxy-links.php
+wget -O uninstall.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/uninstall.php
+wget -O README.md https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/README.md
+wget -O install-guide.md https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/install-guide.md
+
+# دانلود فایل‌های admin
+mkdir -p /var/www/proxy/wordpress-plugin/admin
+cd /var/www/proxy/wordpress-plugin/admin
+wget -O admin-page.php https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/admin/admin-page.php
+
+# دانلود فایل‌های assets
+mkdir -p /var/www/proxy/wordpress-plugin/assets/js
+cd /var/www/proxy/wordpress-plugin/assets/js
+wget -O auto-proxy-links.js https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/assets/js/auto-proxy-links.js
+
+# دانلود فایل‌های languages
+mkdir -p /var/www/proxy/wordpress-plugin/languages
+cd /var/www/proxy/wordpress-plugin/languages
+wget -O auto-proxy-links-fa_IR.po https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/wordpress-plugin/languages/auto-proxy-links-fa_IR.po
+
+# بازگشت به دایرکتوری اصلی
+cd /var/www/proxy
 ```
 
 #### روش 2: آپلود دستی از کامپیوتر محلی:
 ```bash
+# رفتن به دایرکتوری سایت
+cd /var/www/proxy
+
 # در ترمینال محلی خود اجرا کنید:
-scp proxy.php config.php test_proxy.html root@185.235.196.22:/var/www/proxy/
+scp proxy.php config.php test_proxy.html link_rewriter.php debug_proxy.php simple_ip_test.php proxy_ip_test.php test_simple.php php_settings.ini .htaccess root@185.235.196.22:/var/www/proxy/
+
+# آپلود WordPress Plugin (اختیاری)
+scp -r wordpress-plugin/ root@185.235.196.22:/var/www/proxy/
 ```
 
-#### روش 3: ایجاد فایل‌ها مستقیماً روی سرور:
+#### روش 3: Clone کامل repository:
 ```bash
-# ایجاد فایل proxy.php
-cat > /var/www/proxy/proxy.php << 'EOF'
-<?php
-require_once 'config.php';
+# نصب git (اگر نصب نیست)
+apt install -y git
 
-// تنظیمات اولیه
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-ini_set('log_errors', 1);
-ini_set('error_log', '/var/www/proxy/logs/error.log');
+# Clone کردن repository
+cd /var/www
+git clone https://github.com/ayroop/Auto-Link-Proxy.git proxy
+cd proxy
 
-// بررسی درخواست
-if (!isset($_GET['url'])) {
-    http_response_code(400);
-    die('خطا: پارامتر URL مورد نیاز است');
-}
-
-$url = $_GET['url'];
-
-// بررسی مجوز هاست
-$parsed_url = parse_url($url);
-if (!in_array($parsed_url['host'], $allowed_hosts)) {
-    http_response_code(403);
-    die('خطا: این هاست مجاز نیست');
-}
-
-// بررسی نوع فایل
-$extension = strtolower(pathinfo($url, PATHINFO_EXTENSION));
-if (!in_array($extension, $allowed_extensions)) {
-    http_response_code(403);
-    die('خطا: این نوع فایل مجاز نیست');
-}
-
-// تنظیم headers
-$headers = [
-    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-    'Accept: */*',
-    'Accept-Language: en-US,en;q=0.9',
-    'Accept-Encoding: gzip, deflate',
-    'Connection: keep-alive',
-    'Upgrade-Insecure-Requests: 1'
-];
-
-// اضافه کردن Range header برای resume
-if (isset($_SERVER['HTTP_RANGE'])) {
-    $headers[] = 'Range: ' . $_SERVER['HTTP_RANGE'];
-}
-
-// ایجاد context
-$context = stream_context_create([
-    'http' => [
-        'method' => 'GET',
-        'header' => implode("\r\n", $headers),
-        'timeout' => 300,
-        'follow_location' => true,
-        'max_redirects' => 5
-    ]
-]);
-
-// دریافت فایل
-$file_content = @file_get_contents($url, false, $context);
-
-if ($file_content === false) {
-    http_response_code(500);
-    die('خطا: نتوانستیم فایل را دریافت کنیم');
-}
-
-// دریافت headers پاسخ
-$response_headers = $http_response_header ?? [];
-
-// ارسال headers
-foreach ($response_headers as $header) {
-    if (strpos($header, 'HTTP/') === 0) {
-        continue; // Skip status line
-    }
-    header($header);
-}
-
-// اضافه کردن headers امنیتی
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: DENY');
-
-// ارسال محتوا
-echo $file_content;
-EOF
+# حذف فایل‌های غیرضروری
+rm -rf .git .github .gitignore CHANGELOG.md CODE_OF_CONDUCT.md CONTRIBUTING.md LICENSE
 ```
 
 ### تنظیم مجوزها:
 ```bash
+# تنظیم مالکیت
 chown -R www-data:www-data /var/www/proxy
-chmod -R 755 /var/www/proxy
-chmod 644 /var/www/proxy/*.php
-chmod 644 /var/www/proxy/*.html
+
+# تنظیم مجوزهای دایرکتوری‌ها
+find /var/www/proxy -type d -exec chmod 755 {} \;
+
+# تنظیم مجوزهای فایل‌های PHP
+find /var/www/proxy -name "*.php" -exec chmod 644 {} \;
+
+# تنظیم مجوزهای فایل‌های HTML
+find /var/www/proxy -name "*.html" -exec chmod 644 {} \;
+
+# تنظیم مجوزهای فایل‌های تنظیمات
+chmod 644 /var/www/proxy/*.ini
+chmod 644 /var/www/proxy/.htaccess
+
+# تنظیم مجوزهای فایل‌های مستندات
+chmod 644 /var/www/proxy/*.md
+
+# تنظیم مجوزهای WordPress Plugin
+chmod -R 755 /var/www/proxy/wordpress-plugin
+find /var/www/proxy/wordpress-plugin -name "*.php" -exec chmod 644 {} \;
+find /var/www/proxy/wordpress-plugin -name "*.js" -exec chmod 644 {} \;
+find /var/www/proxy/wordpress-plugin -name "*.po" -exec chmod 644 {} \;
 ```
 
 ### ایجاد دایرکتوری لاگ:
