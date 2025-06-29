@@ -57,7 +57,7 @@
 curl -sSL https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/deploy.sh | sudo bash
 ```
 
-### 📝 مراحل قبل از اجرا
+### 📝 مراحل بعد از اجرا
 
 **1. اتصال به سرور:**
 ```bash
