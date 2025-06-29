@@ -5,7 +5,7 @@
 ## 🌐 دامنه‌های پروژه
 
 - **سرور پروکسی (ایران)**: `tr.modulogic.space`
-- **سرور منبع (آلمان)**: `sv1.neurobuild.space`
+- **سرور منبع (آلمان)**: `sv1.netwisehub.space`
 - **IP سرور ایران**: `45.12.143.141`
 
 ## 📋 پیش‌نیازها
@@ -544,8 +544,8 @@ ufw status
 
 ### مثال استفاده:
 ```
-لینک اصلی: https://sv1.neurobuild.space/video.mp4
-لینک پروکسی: https://tr.modulogic.space/proxy.php?url=https%3A//sv1.neurobuild.space/video.mp4
+لینک اصلی: https://sv1.netwisehub.space/video.mp4
+لینک پروکسی: https://tr.modulogic.space/proxy.php?url=https%3A//sv1.netwisehub.space/video.mp4
 ```
 
 ---
