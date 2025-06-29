@@ -23,7 +23,7 @@
 
 ### 1. دانلود فایل‌ها
 
-```bash
+   ```bash
 # دانلود از GitHub
 wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/proxy.php
 wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/config.php
@@ -251,7 +251,7 @@ sudo ./deploy-ubuntu24.sh
 
 ### دستورات مفید
 
-```bash
+  ```bash
 # بررسی وضعیت سرویس‌ها
 systemctl status nginx php8.3-fpm
 

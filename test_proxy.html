@@ -210,6 +210,55 @@
             margin: 10px 0;
         }
         
+        .url-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin: 10px 0;
+            direction: ltr;
+        }
+        
+        .example-links {
+            background: #f0fff4;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 2px solid #48bb78;
+        }
+        
+        .example-links h4 {
+            margin-top: 0;
+            color: #2f855a;
+        }
+        
+        .example-links code {
+            background: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            display: block;
+            margin: 5px 0;
+            word-break: break-all;
+            font-size: 12px;
+        }
+        
+        .copy-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .copy-btn:hover {
+            background: #38a169;
+        }
+        
         p, div, span, a, button, input, textarea, select {
             font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif !important;
         }
@@ -237,6 +286,17 @@
             <p><strong>سرور منبع (آلمان):</strong> sv1.netwisehub.space</p>
             <p><strong>سرور پروکسی (ایران):</strong> tr.modulogic.space</p>
             <p><strong>IP سرور ایران:</strong> 45.12.143.141</p>
+        </div>
+
+        <div class="example-links">
+            <h4>📋 مثال‌های واقعی برای تست</h4>
+            <p><strong>لینک اصلی (بدون پروکسی):</strong></p>
+            <code id="original-url">https://sv1.netwisehub.space/h3/series/sv1/tt14452776/s01/3-Web-DL.480p/The.Bear.S01E01.480p.WEB.DL.HardSub.SerFil.mp4</code>
+            <button class="copy-btn" onclick="copyToClipboard('original-url')">کپی</button>
+            
+            <p><strong>لینک پروکسی:</strong></p>
+            <code id="proxy-url">https://tr.modulogic.space/proxy.php?url=https%3A//sv1.netwisehub.space/h3/series/sv1/tt14452776/s01/3-Web-DL.480p/The.Bear.S01E01.480p.WEB.DL.HardSub.SerFil.mp4</code>
+            <button class="copy-btn" onclick="copyToClipboard('proxy-url')">کپی</button>
         </div>
 
         <div class="info">
@@ -280,48 +340,48 @@
 
         <h2>🎬 تست دانلود فیلم</h2>
         <div class="test-section">
-            <a href="http://sv1.neurobuild.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4" 
+            <a href="https://tr.modulogic.space/proxy.php?url=https%3A//sv1.netwisehub.space/h3/series/sv1/tt14452776/s01/3-Web-DL.480p/The.Bear.S01E01.480p.WEB.DL.HardSub.SerFil.mp4" 
                class="test-link" target="_blank">
-                🎥 دانلود فیلم Seberg (480p) - via Domain
+                🎥 دانلود سریال The Bear - قسمت 1 (480p) - via Proxy
             </a>
 
-            <a href="http://45.12.143.141/proxy.php?url=http://sv1.neurobuild.space/h2/movie/sv1/tt1780967/Seberg.2019.720p.HardSub.SerFil.mp4" 
+            <a href="https://tr.modulogic.space/proxy.php?url=https%3A//sv1.netwisehub.space/h3/series/sv1/tt14452776/s01/3-Web-DL.720p/The.Bear.S01E01.720p.WEB.DL.HardSub.SerFil.mp4" 
                class="test-link" target="_blank">
-                🎥 دانلود فیلم Seberg (720p) - via IP
+                🎥 دانلود سریال The Bear - قسمت 1 (720p) - via Proxy
             </a>
 
-            <a href="http://sv1.neurobuild.space/h2/movie/sv1/tt0111161/The.Shawshank.Redemption.1994.720p.HardSub.SerFil.mp4" 
+            <a href="https://tr.modulogic.space/proxy.php?url=https%3A//sv1.netwisehub.space/h3/movie/sv1/tt0111161/The.Shawshank.Redemption.1994.720p.HardSub.SerFil.mp4" 
                class="test-link" target="_blank">
-                🎥 دانلود فیلم The Shawshank Redemption (720p)
+                🎥 دانلود فیلم The Shawshank Redemption (720p) - via Proxy
             </a>
         </div>
 
         <h2>📺 تست دانلود سریال</h2>
         <div class="test-section">
-            <a href="http://sv1.neurobuild.space/h2/series/sv4/tt13819960/s03/2-Web-DL.720p/And.Just.Like.That.S03E01.720p.WEB.DL.HardSub.SerFil.mp4" 
+            <a href="https://tr.modulogic.space/proxy.php?url=https%3A//sv1.netwisehub.space/h3/series/sv1/tt14452776/s01/3-Web-DL.480p/The.Bear.S01E02.480p.WEB.DL.HardSub.SerFil.mp4" 
                class="test-link" target="_blank">
-                📺 دانلود سریال And Just Like That - قسمت 1
+                📺 دانلود سریال The Bear - قسمت 2 (480p)
             </a>
 
-            <a href="http://sv1.neurobuild.space/h2/series/sv4/tt13819960/s03/2-Web-DL.720p/And.Just.Like.That.S03E02.720p.WEB.DL.HardSub.SerFil.mp4" 
+            <a href="https://tr.modulogic.space/proxy.php?url=https%3A//sv1.netwisehub.space/h3/series/sv1/tt14452776/s01/3-Web-DL.720p/The.Bear.S01E03.720p.WEB.DL.HardSub.SerFil.mp4" 
                class="test-link" target="_blank">
-                📺 دانلود سریال And Just Like That - قسمت 2
+                📺 دانلود سریال The Bear - قسمت 3 (720p)
             </a>
         </div>
 
         <h2>🔧 تست خطا و امنیت</h2>
         <div class="test-section">
-            <a href="http://sv1.neurobuild.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4" 
+            <a href="https://tr.modulogic.space/proxy.php?url=https%3A//example.com/test.mp4" 
                class="test-link" target="_blank" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
-                ❌ تست خطا - دامنه غیرمجاز
+                ❌ تست خطا - دامنه غیرمجاز (example.com)
             </a>
 
-            <a href="http://sv1.neurobuild.space/proxy.php" 
+            <a href="https://tr.modulogic.space/proxy.php" 
                class="test-link" target="_blank" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
                 ❌ تست خطا - بدون پارامتر URL
             </a>
 
-            <a href="http://sv1.neurobuild.space/h2/movie/sv1/tt0111161/The.Shawshank.Redemption.1994.720p.HardSub.SerFil.mp4" 
+            <a href="https://tr.modulogic.space/proxy.php?url=https%3A//sv1.netwisehub.space/test.txt" 
                class="test-link" target="_blank" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
                 ⚠️ تست خطا - پسوند غیرمجاز (.txt)
             </a>
@@ -330,12 +390,36 @@
         <h2>📊 تست عملکرد</h2>
         <div class="test-section">
             <button onclick="testConnection()" class="btn btn-success">🔍 تست اتصال پروکسی</button>
-            <button onclick="checkFileSize()" class="btn">📏 تست اندازه فایل</button>
-            <button onclick="testRangeRequest()" class="btn">⏯️ تست Resume Download</button>
+            <button onclick="testVideoProxy()" class="btn">📹 تست پروکسی ویدیو</button>
+            <button onclick="quickTest('real-video')" class="btn">⚡ تست ویدیو واقعی</button>
+            <button onclick="getServerInfo()" class="btn">📊 اطلاعات سرور</button>
             
             <div id="test-results" class="log-viewer" style="display: none;">
                 <div id="test-output"></div>
             </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📹 تست پروکسی ویدیو</h3>
+            <input type="text" id="video-url" class="url-input" 
+                   placeholder="آدرس ویدیو را وارد کنید"
+                   value="https://sv1.netwisehub.space/h3/series/sv1/tt14452776/s01/3-Web-DL.480p/The.Bear.S01E01.480p.WEB.DL.HardSub.SerFil.mp4">
+            <button class="test-btn" onclick="testVideoProxy()">تست پروکسی ویدیو</button>
+            <div id="video-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>⚡ تست‌های سریع</h3>
+            <button class="test-btn" onclick="quickTest('real-video')">تست ویدیو واقعی</button>
+            <button class="test-btn" onclick="quickTest('httpbin')">تست HTTPBin</button>
+            <button class="test-btn" onclick="quickTest('example')">تست Example.com</button>
+            <div id="quick-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 اطلاعات سرور</h3>
+            <button class="test-btn" onclick="getServerInfo()">دریافت اطلاعات سرور</button>
+            <div id="server-info" class="result"></div>
         </div>
 
         <div class="success">
@@ -368,10 +452,20 @@
         <h2>🔗 لینک مستقیم (بدون پروکسی)</h2>
         <div class="test-section">
             <p>برای مقایسه، این لینک‌ها مستقیماً به سرور خارجی اشاره می‌کنند:</p>
-            <a href="http://sv1.neurobuild.space/h2/movie/sv1/tt1780967/Seberg.2019.480p.HardSub.SerFil.mp4" 
+            <a href="https://sv1.netwisehub.space/h3/series/sv1/tt14452776/s01/3-Web-DL.480p/The.Bear.S01E01.480p.WEB.DL.HardSub.SerFil.mp4" 
                class="test-link" target="_blank" style="background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);">
                 🔗 لینک مستقیم (احتمالاً مسدود)
             </a>
+        </div>
+
+        <h2>🎯 تست دانلود مستقیم</h2>
+        <div class="test-section">
+            <p>برای تست دانلود مستقیم، روی لینک‌های زیر کلیک کنید:</p>
+            <p><strong>لینک اصلی (ممکن است مسدود باشد):</strong></p>
+            <a href="https://sv1.netwisehub.space/h3/series/sv1/tt14452776/s01/3-Web-DL.480p/The.Bear.S01E01.480p.WEB.DL.HardSub.SerFil.mp4" target="_blank" style="color: #e53e3e; text-decoration: none;">🔗 دانلود مستقیم (آلمان)</a>
+            
+            <p><strong>لینک پروکسی (ایران):</strong></p>
+            <a href="https://tr.modulogic.space/proxy.php?url=https%3A//sv1.netwisehub.space/h3/series/sv1/tt14452776/s01/3-Web-DL.480p/The.Bear.S01E01.480p.WEB.DL.HardSub.SerFil.mp4" target="_blank" style="color: #38a169; text-decoration: none;">🔗 دانلود از پروکسی (ایران)</a>
         </div>
 
         <h2>⚙️ تنظیمات پیشنهادی</h2>
@@ -401,6 +495,16 @@
     <script>
         const PROXY_DOMAIN = 'tr.modulogic.space';
         const SOURCE_DOMAIN = 'sv1.netwisehub.space';
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('لینک کپی شد!');
+            }).catch(err => {
+                console.error('خطا در کپی کردن:', err);
+            });
+        }
 
         function testConnection() {
             const resultDiv = document.getElementById('connection-result');
@@ -443,7 +547,9 @@
                     if (response.ok) {
                         const contentLength = response.headers.get('content-length');
                         const contentType = response.headers.get('content-type');
-                        resultDiv.innerHTML = `✅ پروکسی موفق!\n\nآدرس اصلی: ${videoUrl}\nآدرس پروکسی: ${proxyUrl}\nاندازه: ${contentLength ? (contentLength / 1024 / 1024).toFixed(2) + ' MB' : 'نامشخص'}\nنوع: ${contentType || 'نامشخص'}`;
+                        const fileSize = contentLength ? (contentLength / 1024 / 1024).toFixed(2) + ' MB' : 'نامشخص';
+                        
+                        resultDiv.innerHTML = `✅ پروکسی موفق!\n\nآدرس اصلی: ${videoUrl}\nآدرس پروکسی: ${proxyUrl}\nاندازه: ${fileSize}\nنوع: ${contentType || 'نامشخص'}\nکد وضعیت: ${response.status}`;
                         resultDiv.className = 'result success';
                     } else {
                         resultDiv.innerHTML = `❌ خطا در پروکسی\nکد وضعیت: ${response.status}\nآدرس: ${proxyUrl}`;
@@ -458,30 +564,48 @@
 
         function quickTest(type) {
             const resultDiv = document.getElementById('quick-result');
-            const testUrls = {
-                'mp4': `https://${SOURCE_DOMAIN}/test.mp4`,
-                'mkv': `https://${SOURCE_DOMAIN}/test.mkv`,
-                'zip': `https://${SOURCE_DOMAIN}/test.zip`
-            };
+            let testUrl;
+            let testName;
+            
+            switch(type) {
+                case 'real-video':
+                    testUrl = `https://${SOURCE_DOMAIN}/h3/series/sv1/tt14452776/s01/3-Web-DL.480p/The.Bear.S01E01.480p.WEB.DL.HardSub.SerFil.mp4`;
+                    testName = 'ویدیو واقعی';
+                    break;
+                case 'httpbin':
+                    testUrl = 'https://httpbin.org/status/200';
+                    testName = 'HTTPBin';
+                    break;
+                case 'example':
+                    testUrl = 'https://example.com';
+                    testName = 'Example.com';
+                    break;
+                default:
+                    testUrl = `https://${SOURCE_DOMAIN}/test.mp4`;
+                    testName = 'تست';
+            }
 
-            const testUrl = testUrls[type];
             const proxyUrl = `https://${PROXY_DOMAIN}/proxy.php?url=${encodeURIComponent(testUrl)}`;
             
-            resultDiv.innerHTML = `در حال تست فایل ${type.toUpperCase()}...`;
+            resultDiv.innerHTML = `در حال تست ${testName}...`;
             resultDiv.className = 'result info';
 
             fetch(proxyUrl, { method: 'HEAD' })
                 .then(response => {
                     if (response.ok) {
-                        resultDiv.innerHTML = `✅ تست ${type.toUpperCase()} موفق!\nآدرس: ${proxyUrl}`;
+                        const contentLength = response.headers.get('content-length');
+                        const contentType = response.headers.get('content-type');
+                        const fileSize = contentLength ? (contentLength / 1024 / 1024).toFixed(2) + ' MB' : 'نامشخص';
+                        
+                        resultDiv.innerHTML = `✅ تست ${testName} موفق!\nآدرس: ${proxyUrl}\nاندازه: ${fileSize}\nنوع: ${contentType || 'نامشخص'}\nکد وضعیت: ${response.status}`;
                         resultDiv.className = 'result success';
                     } else {
-                        resultDiv.innerHTML = `❌ تست ${type.toUpperCase()} ناموفق\nکد: ${response.status}\nآدرس: ${proxyUrl}`;
+                        resultDiv.innerHTML = `❌ تست ${testName} ناموفق\nکد: ${response.status}\nآدرس: ${proxyUrl}`;
                         resultDiv.className = 'result error';
                     }
                 })
                 .catch(error => {
-                    resultDiv.innerHTML = `❌ خطا در تست ${type.toUpperCase()}\nخطا: ${error.message}`;
+                    resultDiv.innerHTML = `❌ خطا در تست ${testName}\nخطا: ${error.message}`;
                     resultDiv.className = 'result error';
                 });
         }
