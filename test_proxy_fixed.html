@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست پروکسی - نسخه بهبود یافته</title>
+    <style>
+        body { font-family: Tahoma, Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; }
+        .test-section { background: #ecf0f1; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .url { background: #34495e; color: #ecf0f1; padding: 10px; border-radius: 3px; font-family: monospace; word-break: break-all; margin: 10px 0; }
+        .success { background: #27ae60; color: white; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .info { background: #3498db; color: white; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .warning { background: #f39c12; color: white; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .error { background: #e74c3c; color: white; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .test-button { background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .test-button:hover { background: #2980b9; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 3px; }
+        .status.success { background: #d5f4e6; color: #27ae60; border: 1px solid #27ae60; }
+        .status.error { background: #fadbd8; color: #e74c3c; border: 1px solid #e74c3c; }
+        .status.info { background: #d6eaf8; color: #3498db; border: 1px solid #3498db; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 تست پروکسی - نسخه بهبود یافته</h1>
+        
+        <div class="success">
+            <strong>✅ بهبودهای اعمال شده:</strong>
+            <ul>
+                <li>پشتیبانی کامل از HTTP Range headers برای Resume</li>
+                <li>حذف output buffering برای جلوگیری از ERR_CONNECTION_RESET</li>
+                <li>استفاده از cURL streaming برای عملکرد بهتر</li>
+                <li>مدیریت صحیح headers و status codes</li>
+                <li>پشتیبانی از فایل‌های بزرگ تا 10GB</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h2>🎬 تست فایل‌های ویدیو</h2>
+            
+            <h3>تست 1: فایل کوچک (تست اولیه)</h3>
+            <div class="url">https://filmkhabar.space/proxy.php/test/sample.mp4</div>
+            <button class="test-button" onclick="testProxy('https://filmkhabar.space/proxy.php/test/sample.mp4', 'test1')">تست اتصال</button>
+            <div id="test1" class="status info">در انتظار تست...</div>
+            
+            <h3>تست 2: فایل متوسط (تست Resume)</h3>
+            <div class="url">https://filmkhabar.space/proxy.php/movies/medium.mp4</div>
+            <button class="test-button" onclick="testProxy('https://filmkhabar.space/proxy.php/movies/medium.mp4', 'test2')">تست Resume</button>
+            <div id="test2" class="status info">در انتظار تست...</div>
+            
+            <h3>تست 3: فایل بزرگ (تست عملکرد)</h3>
+            <div class="url">https://filmkhabar.space/proxy.php/movies/large.mp4</div>
+            <button class="test-button" onclick="testProxy('https://filmkhabar.space/proxy.php/movies/large.mp4', 'test3')">تست فایل بزرگ</button>
+            <div id="test3" class="status info">در انتظار تست...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔗 تست با IP اختصاصی</h2>
+            
+            <h3>تست 4: استفاده از IP به جای دامنه</h3>
+            <div class="url">https://185.235.196.22/proxy.php/test/sample.mp4</div>
+            <button class="test-button" onclick="testProxy('https://185.235.196.22/proxy.php/test/sample.mp4', 'test4')">تست IP</button>
+            <div id="test4" class="status info">در انتظار تست...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📊 تست عملکرد Resume</h2>
+            
+            <h3>تست 5: درخواست Range Header</h3>
+            <div class="url">Range: bytes=0-1023</div>
+            <button class="test-button" onclick="testRangeRequest('https://filmkhabar.space/proxy.php/test/sample.mp4', 'test5')">تست Range</button>
+            <div id="test5" class="status info">در انتظار تست...</div>
+            
+            <h3>تست 6: درخواست Partial Content</h3>
+            <div class="url">Range: bytes=1024-2047</div>
+            <button class="test-button" onclick="testPartialRequest('https://filmkhabar.space/proxy.php/test/sample.mp4', 'test6')">تست Partial</button>
+            <div id="test6" class="status info">در انتظار تست...</div>
+        </div>
+        
+        <div class="info">
+            <strong>📋 نحوه تست Resume:</strong>
+            <ol>
+                <li>روی یکی از لینک‌های بالا کلیک کنید</li>
+                <li>دانلود را شروع کنید</li>
+                <li>دانلود را متوقف کنید (مثلاً با بستن مرورگر)</li>
+                <li>دوباره روی همان لینک کلیک کنید</li>
+                <li>اگر Resume کار کند، دانلود از همان نقطه ادامه می‌یابد</li>
+            </ol>
+        </div>
+        
+        <div class="warning">
+            <strong>⚠️ نکات مهم:</strong>
+            <ul>
+                <li>برای تست کامل، فایل‌های واقعی در سرور منبع باید موجود باشند</li>
+                <li>تست Range headers نیاز به فایل‌های واقعی دارد</li>
+                <li>در صورت خطا، فایل لاگ proxy_log.txt را بررسی کنید</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function testProxy(url, testId) {
+            const statusDiv = document.getElementById(testId);
+            statusDiv.className = 'status info';
+            statusDiv.textContent = 'در حال تست...';
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ اتصال موفق - سرور پاسخ می‌دهد';
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ خطا در اتصال: ' + error.message;
+            }
+        }
+        
+        async function testRangeRequest(url, testId) {
+            const statusDiv = document.getElementById(testId);
+            statusDiv.className = 'status info';
+            statusDiv.textContent = 'در حال تست Range...';
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Range': 'bytes=0-1023'
+                    }
+                });
+                
+                if (response.status === 206) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ Range request موفق - Partial Content (206)';
+                } else {
+                    statusDiv.className = 'status warning';
+                    statusDiv.textContent = '⚠️ Range request - Status: ' + response.status;
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ خطا در Range request: ' + error.message;
+            }
+        }
+        
+        async function testPartialRequest(url, testId) {
+            const statusDiv = document.getElementById(testId);
+            statusDiv.className = 'status info';
+            statusDiv.textContent = 'در حال تست Partial...';
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Range': 'bytes=1024-2047'
+                    }
+                });
+                
+                if (response.status === 206) {
+                    const contentRange = response.headers.get('Content-Range');
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ Partial request موفق - Content-Range: ' + contentRange;
+                } else {
+                    statusDiv.className = 'status warning';
+                    statusDiv.textContent = '⚠️ Partial request - Status: ' + response.status;
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ خطا در Partial request: ' + error.message;
+            }
+        }
+        
+        // تست خودکار در بارگذاری صفحه
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                testProxy('https://filmkhabar.space/proxy.php/', 'auto-test');
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

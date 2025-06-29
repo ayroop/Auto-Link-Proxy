@@ -10,10 +10,12 @@
 // بارگذاری تنظیمات
 require_once 'config.php';
 
-// تنظیمات اولیه
-ini_set('memory_limit', '2G');
+// تنظیمات اولیه برای فایل‌های بزرگ
+ini_set('memory_limit', '512M');
 ini_set('max_execution_time', 0);
 ini_set('display_errors', 0);
+ini_set('output_buffering', 'Off');
+ini_set('zlib.output_compression', false);
 
 // کلاس لاگ‌گیری
 class ProxyLogger {
@@ -93,7 +95,11 @@ class VideoProxy {
     }
             
             // ساخت URL کامل منبع
-            $sourceUrl = "https://{$this->sourceDomain}{$filePath}";
+            if (preg_match('#^https?://#i', $filePath)) {
+                $sourceUrl = $filePath;
+            } else {
+                $sourceUrl = "https://{$this->sourceDomain}" . (strpos($filePath, '/') === 0 ? $filePath : "/$filePath");
+            }
             $this->logger->log("URL منبع: $sourceUrl");
             
             // ارسال فایل
@@ -142,200 +148,211 @@ class VideoProxy {
             return false;
         }
         
-        // بررسی اندازه فایل (اگر در header موجود باشد)
-        $contentLength = $_SERVER['HTTP_CONTENT_LENGTH'] ?? 0;
-        if ($contentLength > MAX_FILE_SIZE) {
-            $this->logger->log("فایل خیلی بزرگ: $contentLength bytes", 'WARNING');
-            return false;
-        }
-        
         return true;
     }
     
     private function proxyFile($sourceUrl, $filePath) {
-        // تنظیم headers
-        $headers = $this->prepareHeaders();
+        // Set the current file name for headers
+        $this->currentFileName = basename($filePath) ?: 'video.mp4';
         
-        // ایجاد context برای درخواست
-        $context = stream_context_create([
-            'http' => [
-                'method' => $_SERVER['REQUEST_METHOD'],
-                'header' => $headers,
-                'timeout' => REQUEST_TIMEOUT,
-                'follow_location' => false,
-                'max_redirects' => 0
-            ]
+        // دریافت Range header
+        $rangeHeader = $_SERVER['HTTP_RANGE'] ?? '';
+        $this->logger->log("Range header: $rangeHeader", 'DEBUG');
+        
+        // First, get headers with HEAD request
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $sourceUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => true,
+            CURLOPT_NOBODY => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_MAXREDIRS => 0,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         ]);
         
-        // باز کردن stream
-        $stream = @fopen($sourceUrl, 'rb', false, $context);
-        if (!$stream) {
-            $this->logger->log("خطا در باز کردن فایل: $sourceUrl", 'ERROR');
-            $this->errorResponse('فایل یافت نشد', 404);
-            return;
-        }
-        
-        // دریافت meta data
-        $metaData = stream_get_meta_data($stream);
-        $responseHeaders = $metaData['wrapper_data'] ?? [];
-        
-        // بررسی کد پاسخ
-        $statusCode = $this->extractStatusCode($responseHeaders);
-        if ($statusCode !== 200 && $statusCode !== 206) {
-            fclose($stream);
-            $this->logger->log("خطای HTTP: $statusCode", 'ERROR');
-            $this->errorResponse('خطای سرور منبع', $statusCode);
-            return;
-        }
-        
-        // ارسال headers
-        $this->sendHeaders($responseHeaders, $filePath);
-        
-        // ارسال محتوا
-        $this->streamContent($stream);
-        
-        fclose($stream);
-        $this->logger->log("فایل با موفقیت ارسال شد: $filePath");
-    }
-    
-    private function prepareHeaders() {
+        // Add Range header if present
         $headers = [];
+        if (!empty($rangeHeader)) {
+            $headers[] = "Range: $rangeHeader";
+        }
         
-        // کپی headers مهم
+        // Add other important headers
         $importantHeaders = [
-            'Range', 'If-Range', 'If-Modified-Since', 
-            'If-None-Match', 'Accept', 'Accept-Encoding',
-            'User-Agent', 'Referer'
+            'If-Range', 'If-Modified-Since', 'If-None-Match', 
+            'Accept', 'Accept-Encoding', 'Referer'
         ];
         
         foreach ($importantHeaders as $header) {
-            $value = $_SERVER['HTTP_' . strtoupper(str_replace('-', '_', $header))] ?? '';
+            $serverKey = 'HTTP_' . strtoupper(str_replace('-', '_', $header));
+            $value = $_SERVER[$serverKey] ?? '';
             if (!empty($value)) {
                 $headers[] = "$header: $value";
             }
         }
         
-        // اضافه کردن User-Agent پیش‌فرض
-        if (empty(array_filter($headers, function($h) { return strpos($h, 'User-Agent:') === 0; }))) {
-            $headers[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
+        if (!empty($headers)) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         }
         
-        return implode("\r\n", $headers);
+        $headResponse = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+        
+        if ($headResponse === false) {
+            $this->logger->log("خطای cURL در HEAD: $error", 'ERROR');
+            $this->errorResponse('خطا در اتصال به سرور منبع', 502);
+            return;
+        }
+        
+        // Parse headers from HEAD response
+        $this->parseHeaders($headResponse);
+        
+        // Send appropriate headers to client
+        $this->sendSimpleHeaders($httpCode);
+        
+        // Now stream the actual content
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $sourceUrl,
+            CURLOPT_RETURNTRANSFER => false,
+            CURLOPT_HEADER => false,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_MAXREDIRS => 0,
+            CURLOPT_TIMEOUT => REQUEST_TIMEOUT,
+            CURLOPT_CONNECTTIMEOUT => 30,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            CURLOPT_WRITEFUNCTION => function($ch, $data) {
+                echo $data;
+                if (ob_get_level()) ob_flush();
+                flush();
+                return connection_aborted() ? -1 : strlen($data);
+            }
+        ]);
+        
+        if (!empty($headers)) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        }
+        
+        $result = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+        
+        if ($result === false) {
+            $this->logger->log("خطای cURL: $error", 'ERROR');
+            return;
+        }
+        
+        $this->logger->log("فایل با موفقیت ارسال شد: $filePath (HTTP: $httpCode)");
     }
     
-    private function extractStatusCode($headers) {
-        foreach ($headers as $header) {
-            if (preg_match('/^HTTP\/\d\.\d\s+(\d+)/', $header, $matches)) {
-                return (int)$matches[1];
+    private function parseHeaders($headResponse) {
+        $lines = explode("\r\n", $headResponse);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line)) continue;
+            
+            $lineLower = strtolower($line);
+            if (strpos($lineLower, 'content-type:') === 0) {
+                $this->contentType = trim(substr($line, 13));
+            } elseif (strpos($lineLower, 'content-length:') === 0) {
+                $this->contentLength = trim(substr($line, 15));
+            } elseif (strpos($lineLower, 'content-range:') === 0) {
+                $this->contentRange = trim(substr($line, 14));
+                $this->isPartial = true;
+            } elseif (strpos($lineLower, 'accept-ranges:') === 0) {
+                $this->acceptRanges = trim(substr($line, 14));
+            } elseif (strpos($lineLower, 'last-modified:') === 0) {
+                $this->lastModified = trim(substr($line, 14));
+            } elseif (strpos($lineLower, 'etag:') === 0) {
+                $this->etag = trim(substr($line, 6));
             }
         }
-        return 200;
     }
     
-    private function sendHeaders($responseHeaders, $filePath) {
-        // حذف headers غیرضروری
-        $skipHeaders = [
-            'transfer-encoding', 'connection', 'keep-alive',
-            'proxy-authenticate', 'proxy-authorization', 'content-disposition',
-            'content-type', 'content-length', 'accept-ranges', 'content-range'
-        ];
-        $contentType = null;
-        $contentLength = null;
-        $contentRange = null;
-        $has206 = false;
-        foreach ($responseHeaders as $header) {
-            $headerLower = strtolower($header);
-            $shouldSkip = false;
-            foreach ($skipHeaders as $skip) {
-                if (strpos($headerLower, $skip) === 0) {
-                    $shouldSkip = true;
-                    break;
-                }
-            }
-            if (!$shouldSkip) {
-                header($header, false);
-            }
-            // استخراج Content-Type و Content-Length و Content-Range
-            if (stripos($header, 'Content-Type:') === 0) {
-                $contentType = trim(substr($header, 13));
-            }
-            if (stripos($header, 'Content-Length:') === 0) {
-                $contentLength = trim(substr($header, 15));
-            }
-            if (stripos($header, 'Content-Range:') === 0) {
-                $contentRange = trim(substr($header, 14));
-            }
-            if (preg_match('/^HTTP\/\d\.\d\s+206/', $header)) {
-                $has206 = true;
-            }
+    private function sendSimpleHeaders($httpCode) {
+        // Clear any output buffering
+        while (ob_get_level()) {
+            ob_end_clean();
         }
-        // --- استخراج نام فایل به صورت هوشمند ---
-        $filename = '';
-        $urlParam = $_GET['url'] ?? '';
-        if ($urlParam) {
-            $parsed = parse_url($urlParam);
-            $filename = isset($parsed['path']) ? basename($parsed['path']) : '';
-        }
-        if (!$filename || strpos($filename, '.') === false) {
-            $filename = basename($filePath);
-        }
-        if (!$filename || strpos($filename, '.') === false) {
-            $filename = 'video.mp4';
-        }
-        // --- تنظیم هدرهای اصلی ---
-        if ($contentType) {
-            header('Content-Type: ' . $contentType, true);
+        
+        // Set HTTP status code
+        if ($this->isPartial || $httpCode == 206) {
+            http_response_code(206);
         } else {
-            header('Content-Type: application/octet-stream', true);
+            http_response_code(200);
         }
-        if ($contentLength) {
-            header('Content-Length: ' . $contentLength, true);
+        
+        // Set Content-Type
+        if ($this->contentType) {
+            header('Content-Type: ' . $this->contentType);
+        } else {
+            header('Content-Type: application/octet-stream');
         }
-        if ($contentRange) {
-            header('Content-Range: ' . $contentRange, true);
+        
+        // Set Content-Length
+        if ($this->contentLength) {
+            header('Content-Length: ' . $this->contentLength);
         }
-        // پشتیبانی از Resume
-        header('Accept-Ranges: bytes', true);
-        // اگر 206 Partial Content بود، باید Content-Range هم باشد
-        // --- Content-Disposition ---
-        header('Content-Disposition: inline; filename="' . $filename . '"', true);
-        // اضافه کردن headers امنیتی
+        
+        // Set Content-Range for partial content
+        if ($this->contentRange) {
+            header('Content-Range: ' . $this->contentRange);
+        }
+        
+        // Set Accept-Ranges
+        if ($this->acceptRanges) {
+            header('Accept-Ranges: ' . $this->acceptRanges);
+        } else {
+            header('Accept-Ranges: bytes');
+        }
+        
+        // Set Last-Modified
+        if ($this->lastModified) {
+            header('Last-Modified: ' . $this->lastModified);
+        }
+        
+        // Set ETag
+        if ($this->etag) {
+            header('ETag: ' . $this->etag);
+        }
+        
+        // Set Content-Disposition
+        header('Content-Disposition: inline; filename="' . $this->currentFileName . '"');
+        
+        // Set security headers
         header('X-Proxy-Server: filmkhabar.space');
         header('X-Source-Domain: ' . $this->sourceDomain);
-        // تنظیم CORS برای درخواست‌های AJAX
+        
+        // Set CORS headers
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS');
         header('Access-Control-Allow-Headers: Range, If-Range, If-Modified-Since, If-None-Match');
+        
+        // Set Cache headers
+        header('Cache-Control: public, max-age=3600');
+        header('Pragma: public');
+        
+        $this->logger->log("Headers sent successfully", 'DEBUG');
     }
     
-    private function streamContent($stream) {
-        $bufferSize = BUFFER_SIZE;
-        $totalSent = 0;
-        
-        while (!feof($stream)) {
-            $chunk = fread($stream, $bufferSize);
-            if ($chunk === false) {
-                break;
-            }
-            
-            echo $chunk;
-            $totalSent += strlen($chunk);
-            
-            // flush output
-            if (ob_get_level()) {
-                ob_flush();
-            }
-            flush();
-            
-            // بررسی timeout
-            if (connection_aborted()) {
-                $this->logger->log("اتصال توسط کاربر قطع شد", 'INFO');
-                break;
-            }
-        }
-        
-        $this->logger->log("تعداد بایت ارسال شده: $totalSent");
-    }
+    private $responseHeaders = [];
+    private $contentType = null;
+    private $contentLength = null;
+    private $contentRange = null;
+    private $acceptRanges = null;
+    private $lastModified = null;
+    private $etag = null;
+    private $isPartial = false;
+    private $currentFileName = 'video.mp4';
     
     private function showUsage() {
         header('Content-Type: text/html; charset=utf-8');
@@ -366,7 +383,7 @@ class VideoProxy {
         <h2>📋 نحوه استفاده:</h2>
         <div class="example">
             <strong>لینک اصلی:</strong><br>
-            <div class="url">https://sv1.neurobuild.space/path/to/video.mp4</div>
+            <div class="url">https://sv1.netwisehub.space/path/to/video.mp4</div>
             
             <strong>لینک پروکسی:</strong><br>
             <div class="url">https://filmkhabar.space/proxy.php/path/to/video.mp4</div>
@@ -375,8 +392,8 @@ class VideoProxy {
         <h2>🔧 ویژگی‌ها:</h2>
         <ul>
             <li>✅ پشتیبانی از فایل‌های بزرگ (تا 10GB)</li>
-            <li>✅ قابلیت Resume دانلود</li>
-            <li>✅ سرعت بالا با بافر بهینه</li>
+            <li>✅ قابلیت Resume دانلود (HTTP Range)</li>
+            <li>✅ سرعت بالا با cURL streaming</li>
             <li>✅ لاگ‌گیری کامل</li>
             <li>✅ امنیت بالا</li>
         </ul>
