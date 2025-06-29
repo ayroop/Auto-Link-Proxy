@@ -57,24 +57,29 @@
 curl -sSL https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/deploy.sh | sudo bash
 ```
 
-### 📝 مراحل بعد از اجرا
+### 📝 مراحل قبل از اجرا
 
 **1. اتصال به سرور:**
 ```bash
 ssh root@your-server-ip
 ```
 
-**2. تنظیم دامنه خود:**
+**2. دانلود اسکریپت:**
+```bash
+wget https://raw.githubusercontent.com/ayroop/Auto-Link-Proxy/main/deploy.sh
+```
+
+**3. تنظیم دامنه خود:**
 ```bash
 sed -i 's/DOMAIN="filmkhabar.space"/DOMAIN="your-domain.com"/' deploy.sh
 ```
 
-**3. تنظیم ایمیل خود:**
+**4. تنظیم ایمیل خود:**
 ```bash
 sed -i 's/EMAIL="your-email@example.com"/EMAIL="your-actual-email@example.com"/' deploy.sh
 ```
 
-**4. اجرای استقرار:**
+**5. اجرای استقرار:**
 ```bash
 sudo bash deploy.sh
 ```
