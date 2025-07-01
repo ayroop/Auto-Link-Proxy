@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Proxy Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        video {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+        }
+        .info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Video Proxy Test</h1>
+    
+    <div class="info">
+        <h3>Testing video streaming through proxy</h3>
+        <p>This page tests if the proxy can stream video files properly in browsers.</p>
+    </div>
+    
+    <video controls preload="metadata">
+        <source src="proxy.php?url=/h3/series/sv1/tt14452776/s01/3-Web-DL.480p/The.Bear.S01E01.480p.WEB.DL.HardSub.SerFil.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    
+    <div class="info">
+        <h3>Direct Link Test</h3>
+        <p><a href="proxy.php?url=/h3/series/sv1/tt14452776/s01/3-Web-DL.480p/The.Bear.S01E01.480p.WEB.DL.HardSub.SerFil.mp4" target="_blank">Open video directly</a></p>
+    </div>
+    
+    <script>
+        const video = document.querySelector('video');
+        
+        video.addEventListener('loadstart', () => {
+            console.log('Video loading started');
+        });
+        
+        video.addEventListener('loadedmetadata', () => {
+            console.log('Video metadata loaded');
+        });
+        
+        video.addEventListener('canplay', () => {
+            console.log('Video can start playing');
+        });
+        
+        video.addEventListener('error', (e) => {
+            console.error('Video error:', e);
+        });
+        
+        video.addEventListener('stalled', () => {
+            console.log('Video stalled');
+        });
+        
+        video.addEventListener('waiting', () => {
+            console.log('Video waiting for data');
+        });
+    </script>
+</body>
+</html>
