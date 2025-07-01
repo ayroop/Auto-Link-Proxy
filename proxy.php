@@ -1,3 +1,4 @@
+
 <?php
 /**
  * پروکسی اسکریپت برای عبور از محدودیت‌های دانلود
@@ -155,10 +156,6 @@ class VideoProxy {
         // Set the current file name for headers
         $this->currentFileName = basename($filePath) ?: 'video.mp4';
         
-        // Extend execution time for large files
-        set_time_limit(0);
-        ignore_user_abort(false);
-        
         // دریافت Range header
         $rangeHeader = $_SERVER['HTTP_RANGE'] ?? '';
         $this->logger->log("Range header: $rangeHeader", 'DEBUG');
@@ -177,10 +174,6 @@ class VideoProxy {
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            // Enhanced SSL/TLS settings for Iranian ISPs
-            CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
-            CURLOPT_SSL_CIPHER_LIST => 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384',
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         ]);
         
         // Add Range header if present
@@ -224,9 +217,6 @@ class VideoProxy {
         // Send appropriate headers to client
         $this->sendSimpleHeaders($httpCode);
         
-        // Store logger reference for the callback
-        $logger = $this->logger;
-        
         // Now stream the actual content
         $ch = curl_init();
         curl_setopt_array($ch, [
@@ -235,29 +225,26 @@ class VideoProxy {
             CURLOPT_HEADER => false,
             CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_MAXREDIRS => 0,
-            CURLOPT_TIMEOUT => 0, // No timeout for streaming
+            CURLOPT_TIMEOUT => REQUEST_TIMEOUT,
             CURLOPT_CONNECTTIMEOUT => 30,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            CURLOPT_BUFFERSIZE => 8192, // 8KB buffer - smaller for better responsiveness
+            CURLOPT_BUFFERSIZE => 16384, // 16KB buffer for smoother streaming
             CURLOPT_TCP_NODELAY => true,
-            // Enhanced SSL/TLS settings for Iranian ISPs
-            CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
-            CURLOPT_SSL_CIPHER_LIST => 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384',
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_WRITEFUNCTION => function($ch, $data) use ($logger) {
+            CURLOPT_WRITEFUNCTION => function($ch, $data) {
                 // Check if connection is still alive
                 if (connection_aborted()) {
+                    $this->logger->log("اتصال توسط کاربر قطع شد", 'INFO');
                     return -1; // Stop cURL
                 }
                 
                 // Output the data
                 echo $data;
                 
-                // Flush output buffers more aggressively
-                while (ob_get_level()) {
-                    ob_end_flush();
+                // Flush output buffers
+                if (ob_get_level()) {
+                    ob_flush();
                 }
                 flush();
                 
@@ -274,7 +261,7 @@ class VideoProxy {
         $error = curl_error($ch);
         curl_close($ch);
         
-        if ($result === false && !connection_aborted()) {
+        if ($result === false) {
             $this->logger->log("خطای cURL: $error", 'ERROR');
             return;
         }
