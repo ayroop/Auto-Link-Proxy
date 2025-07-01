@@ -92,8 +92,8 @@ class VideoProxy {
             // بررسی امنیت
             if (!$this->validateSecurity($filePath)) {
                 $this->errorResponse('دسترسی غیرمجاز', 403);
-        return;
-    }
+                return;
+            }
             
             // ساخت URL کامل منبع
             if (preg_match('#^https?://#i', $filePath)) {
@@ -149,12 +149,28 @@ class VideoProxy {
             return false;
         }
         
+        // بررسی directory traversal
+        if (strpos($filePath, '..') !== false) {
+            $this->logger->log("تلاش برای directory traversal: $filePath", 'WARNING');
+            return false;
+        }
+        
+        // بررسی کاراکترهای غیرمجاز
+        if (preg_match('/[<>:"|?*]/', $filePath)) {
+            $this->logger->log("کاراکترهای غیرمجاز در مسیر: $filePath", 'WARNING');
+            return false;
+        }
+        
         return true;
     }
     
     private function proxyFile($sourceUrl, $filePath) {
         // Set the current file name for headers
         $this->currentFileName = basename($filePath) ?: 'video.mp4';
+        
+        // Extend execution time for large files
+        set_time_limit(0);
+        ignore_user_abort(false);
         
         // دریافت Range header
         $rangeHeader = $_SERVER['HTTP_RANGE'] ?? '';
@@ -174,6 +190,10 @@ class VideoProxy {
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            // Enhanced SSL/TLS settings for Iranian ISPs
+            CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
+            CURLOPT_SSL_CIPHER_LIST => 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384',
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         ]);
         
         // Add Range header if present
@@ -217,6 +237,9 @@ class VideoProxy {
         // Send appropriate headers to client
         $this->sendSimpleHeaders($httpCode);
         
+        // Store logger reference for the callback
+        $logger = $this->logger;
+        
         // Now stream the actual content
         $ch = curl_init();
         curl_setopt_array($ch, [
@@ -225,26 +248,29 @@ class VideoProxy {
             CURLOPT_HEADER => false,
             CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_MAXREDIRS => 0,
-            CURLOPT_TIMEOUT => REQUEST_TIMEOUT,
+            CURLOPT_TIMEOUT => 0, // No timeout for streaming
             CURLOPT_CONNECTTIMEOUT => 30,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            CURLOPT_BUFFERSIZE => 16384, // 16KB buffer for smoother streaming
+            CURLOPT_BUFFERSIZE => 8192, // 8KB buffer - smaller for better responsiveness
             CURLOPT_TCP_NODELAY => true,
-            CURLOPT_WRITEFUNCTION => function($ch, $data) {
+            // Enhanced SSL/TLS settings for Iranian ISPs
+            CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
+            CURLOPT_SSL_CIPHER_LIST => 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384',
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_WRITEFUNCTION => function($ch, $data) use ($logger) {
                 // Check if connection is still alive
                 if (connection_aborted()) {
-                    $this->logger->log("اتصال توسط کاربر قطع شد", 'INFO');
                     return -1; // Stop cURL
                 }
                 
                 // Output the data
                 echo $data;
                 
-                // Flush output buffers
-                if (ob_get_level()) {
-                    ob_flush();
+                // Flush output buffers more aggressively
+                while (ob_get_level()) {
+                    ob_end_flush();
                 }
                 flush();
                 
@@ -261,7 +287,7 @@ class VideoProxy {
         $error = curl_error($ch);
         curl_close($ch);
         
-        if ($result === false) {
+        if ($result === false && !connection_aborted()) {
             $this->logger->log("خطای cURL: $error", 'ERROR');
             return;
         }
