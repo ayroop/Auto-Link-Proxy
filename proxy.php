@@ -155,6 +155,10 @@ class VideoProxy {
         // Set the current file name for headers
         $this->currentFileName = basename($filePath) ?: 'video.mp4';
         
+        // Extend execution time for large files
+        set_time_limit(0);
+        ignore_user_abort(false);
+        
         // دریافت Range header
         $rangeHeader = $_SERVER['HTTP_RANGE'] ?? '';
         $this->logger->log("Range header: $rangeHeader", 'DEBUG');
@@ -173,6 +177,10 @@ class VideoProxy {
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            // Enhanced SSL/TLS settings for Iranian ISPs
+            CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
+            CURLOPT_SSL_CIPHER_LIST => 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384',
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         ]);
         
         // Add Range header if present
@@ -216,6 +224,9 @@ class VideoProxy {
         // Send appropriate headers to client
         $this->sendSimpleHeaders($httpCode);
         
+        // Store logger reference for the callback
+        $logger = $this->logger;
+        
         // Now stream the actual content
         $ch = curl_init();
         curl_setopt_array($ch, [
@@ -224,16 +235,33 @@ class VideoProxy {
             CURLOPT_HEADER => false,
             CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_MAXREDIRS => 0,
-            CURLOPT_TIMEOUT => REQUEST_TIMEOUT,
+            CURLOPT_TIMEOUT => 0, // No timeout for streaming
             CURLOPT_CONNECTTIMEOUT => 30,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            CURLOPT_WRITEFUNCTION => function($ch, $data) {
+            CURLOPT_BUFFERSIZE => 8192, // 8KB buffer - smaller for better responsiveness
+            CURLOPT_TCP_NODELAY => true,
+            // Enhanced SSL/TLS settings for Iranian ISPs
+            CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
+            CURLOPT_SSL_CIPHER_LIST => 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384',
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_WRITEFUNCTION => function($ch, $data) use ($logger) {
+                // Check if connection is still alive
+                if (connection_aborted()) {
+                    return -1; // Stop cURL
+                }
+                
+                // Output the data
                 echo $data;
-                if (ob_get_level()) ob_flush();
+                
+                // Flush output buffers more aggressively
+                while (ob_get_level()) {
+                    ob_end_flush();
+                }
                 flush();
-                return connection_aborted() ? -1 : strlen($data);
+                
+                return strlen($data);
             }
         ]);
         
@@ -246,7 +274,7 @@ class VideoProxy {
         $error = curl_error($ch);
         curl_close($ch);
         
-        if ($result === false) {
+        if ($result === false && !connection_aborted()) {
             $this->logger->log("خطای cURL: $error", 'ERROR');
             return;
         }
@@ -291,12 +319,31 @@ class VideoProxy {
             http_response_code(200);
         }
         
-        // Set Content-Type
-        if ($this->contentType) {
-            header('Content-Type: ' . $this->contentType);
-        } else {
-            header('Content-Type: application/octet-stream');
+        // Set Content-Type with proper video MIME type detection
+        $contentType = $this->contentType;
+        if (!$contentType) {
+            $extension = strtolower(pathinfo($this->currentFileName, PATHINFO_EXTENSION));
+            switch ($extension) {
+                case 'mp4':
+                    $contentType = 'video/mp4';
+                    break;
+                case 'mkv':
+                    $contentType = 'video/x-matroska';
+                    break;
+                case 'avi':
+                    $contentType = 'video/x-msvideo';
+                    break;
+                case 'mov':
+                    $contentType = 'video/quicktime';
+                    break;
+                case 'webm':
+                    $contentType = 'video/webm';
+                    break;
+                default:
+                    $contentType = 'application/octet-stream';
+            }
         }
+        header('Content-Type: ' . $contentType);
         
         // Set Content-Length
         if ($this->contentLength) {
@@ -308,12 +355,8 @@ class VideoProxy {
             header('Content-Range: ' . $this->contentRange);
         }
         
-        // Set Accept-Ranges
-        if ($this->acceptRanges) {
-            header('Accept-Ranges: ' . $this->acceptRanges);
-        } else {
-            header('Accept-Ranges: bytes');
-        }
+        // Set Accept-Ranges - crucial for video streaming
+        header('Accept-Ranges: bytes');
         
         // Set Last-Modified
         if ($this->lastModified) {
@@ -325,21 +368,25 @@ class VideoProxy {
             header('ETag: ' . $this->etag);
         }
         
-        // Set Content-Disposition
+        // Set Content-Disposition for inline viewing (not download)
         header('Content-Disposition: inline; filename="' . $this->currentFileName . '"');
         
         // Set security headers
         header('X-Proxy-Server: filmkhabar.space');
         header('X-Source-Domain: ' . $this->sourceDomain);
         
-        // Set CORS headers
+        // Set CORS headers for video streaming
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS');
         header('Access-Control-Allow-Headers: Range, If-Range, If-Modified-Since, If-None-Match');
+        header('Access-Control-Expose-Headers: Content-Length, Content-Range, Accept-Ranges');
         
-        // Set Cache headers
-        header('Cache-Control: public, max-age=3600');
+        // Set Cache headers optimized for video
+        header('Cache-Control: public, max-age=3600, must-revalidate');
         header('Pragma: public');
+        
+        // Additional headers for better video streaming
+        header('Connection: keep-alive');
         
         $this->logger->log("Headers sent successfully", 'DEBUG');
     }
