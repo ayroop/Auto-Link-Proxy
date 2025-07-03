@@ -149,8 +149,8 @@ class VideoProxy {
             return false;
         }
         
-        // بررسی directory traversal
-        if (strpos($filePath, '..') !== false) {
+        // بررسی directory traversal - فقط الگوهای خطرناک را مسدود کن
+        if (preg_match('#(^|/)\.\.(/|$)#', $filePath)) {
             $this->logger->log("تلاش برای directory traversal: $filePath", 'WARNING');
             return false;
         }
